@@ -42,10 +42,11 @@ export const FormField = (props: FormFieldProps) => {
 
       {as === "textarea" ? (
         <textarea
+        rows={8}
           {...(rest as TextareaHTMLAttributes<HTMLTextAreaElement>)}
           {...register}
           className={cn(
-            "bg-secondary-bg text-foreground placeholder:text-muted-foreground h-28 w-full resize-none rounded-lg border px-3 py-3 text-sm transition-colors outline-none sm:h-24 sm:px-4 sm:py-2.5 sm:text-base rtl:text-right",
+            "bg-secondary-bg text-foreground placeholder:text-muted-foreground h-28 w-full resize-none rounded-lg border px-3 py-3 text-sm transition-colors outline-none sm:h-40 sm:px-4 sm:py-2.5 sm:text-base rtl:text-right",
 
             error
               ? "border-red-500 focus:border-red-500"
