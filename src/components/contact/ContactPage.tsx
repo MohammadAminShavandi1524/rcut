@@ -18,11 +18,9 @@ const ContactPage = () => {
           transition={{ duration: 0.6, ease }}
           className="mb-14 max-w-3xl"
         >
-          <span className="text-custom-primary text-sm font-medium">
-            ارتباط با آرکات
-          </span>
+         
 
-          <h1 className="text-foreground mt-4 text-5xl leading-[1.25] font-bold">
+          <h1 className="text-foreground text-5xl leading-[1.25] font-bold">
             با ما در ارتباط باشید
           </h1>
 
@@ -175,7 +173,7 @@ const ContactPage = () => {
           className="border-border mt-18 h-[300px] overflow-hidden rounded-2xl border sm:h-[350px] md:h-[380px] lg:h-[400px] xl:h-[420px]"
         >
           <iframe
-            src="https://www.google.com/maps?q=35.754243,51.332173&z=15&output=embed"
+            src="https://www.google.com/maps?q=35.685914,51.412051&z=15&output=embed"
             width="100%"
             height="100%"
             loading="lazy"

@@ -2,7 +2,7 @@ import { shippingMethods } from "./shipping-methods.data";
 
 const ShippingMethods = () => {
   return (
-    <section className="py-24">
+    <section className="pb-24 pt-12">
       <div className="w90" dir="rtl">
         {/* Header */}
         <div className="text-center">
@@ -21,14 +21,14 @@ const ShippingMethods = () => {
             return (
               <div
                 key={item.id}
-                className="after:bg-border relative flex flex-col items-center justify-center gap-5 px-8 text-center after:absolute after:end-0 after:top-1/2 after:h-20 after:w-px after:-translate-y-1/2 last:after:hidden"
+                className="group after:bg-border relative flex flex-col items-center justify-center gap-5 px-8 text-center after:absolute after:end-0 after:top-1/2 after:h-20 after:w-px after:-translate-y-1/2 last:after:hidden"
               >
                 <Icon
-                  className="text-custom-primary size-14"
+                  className="text-custom-primary size-14 transition-transform duration-500 ease group-hover:scale-110"
                   strokeWidth={1.5}
                 />
 
-                <h3 className="text-foreground text-xl font-semibold">
+                <h3 className="text-foreground group-hover:text-custom-primary text-xl font-semibold transition-colors duration-300">
                   {item.name}
                 </h3>
               </div>

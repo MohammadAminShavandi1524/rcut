@@ -30,7 +30,7 @@ const Map3 = ({}: Map3Props) => {
       className="border-border mt-12 h-[300px] overflow-hidden rounded-2xl border sm:h-[350px] md:h-[380px] lg:h-[400px] xl:h-[420px]"
     >
       <iframe
-        src="https://www.google.com/maps?q=35.754243,51.332173&z=15&output=embed"
+        src="https://www.google.com/maps?q=35.685914,51.412051&z=15&output=embed"
         width="100%"
         height="100%"
         loading="lazy"

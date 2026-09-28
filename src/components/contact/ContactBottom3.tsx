@@ -33,7 +33,9 @@ const ContactBottom3 = () => {
       <div className="grid gap-8">
         {/* Email */}
         <a href="mailto:rcutcompany@gmail.com" className="group">
-          <span className="text-foreground block text-base font-semibold">ایمیل</span>
+          <span className="text-foreground block text-base font-semibold">
+            ایمیل
+          </span>
 
           <div className="mt-2 flex items-center gap-3">
             <Mail
@@ -44,7 +46,7 @@ const ContactBottom3 = () => {
 
             <span
               dir="ltr"
-              className="text-foreground/90 group-hover:text-custom-primary text-lg transition-colors duration-300 pt-0.25"
+              className="text-foreground/90 group-hover:text-custom-primary pt-0.25 text-lg transition-colors duration-300"
             >
               rcutcompany@gmail.com
             </span>
@@ -66,7 +68,7 @@ const ContactBottom3 = () => {
 
             <span
               dir="ltr"
-              className="text-foreground/90 group-hover:text-custom-primary text-lg  transition-colors duration-300 pt-1"
+              className="text-foreground/90 group-hover:text-custom-primary pt-1 text-lg transition-colors duration-300"
             >
               09192081368
             </span>
@@ -84,20 +86,19 @@ const ContactBottom3 = () => {
           ما را در شبکه‌های اجتماعی دنبال کنید
         </p>
 
-        <div className="mt-6 flex items-center gap-6">
+        <div className="mt-6 flex items-center gap-5.25">
           {socials.map((item) => (
             <a
               key={item.name}
               href={item.href}
               aria-label={item.name}
-              className="flex size-10 items-center justify-center overflow-hidden rounded-md"
+              className="relative flex size-8.5 items-center justify-center overflow-hidden rounded-md"
             >
               <Image
                 src={item.icon}
                 alt={item.name}
-                width={40}
-                height={40}
-                className="h-10 w-10 object-contain"
+                fill
+                className="object-contain"
               />
             </a>
           ))}
