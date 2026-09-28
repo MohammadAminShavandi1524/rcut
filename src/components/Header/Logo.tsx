@@ -5,7 +5,7 @@ const Logo = () => {
   return (
     <Link href="/" aria-label="RCUT" className="flex shrink-0 items-center">
       <Image
-        src="/logo.webp"
+        src="/logo2.webp"
         alt="RCUT"
         width={459}
         height={321}

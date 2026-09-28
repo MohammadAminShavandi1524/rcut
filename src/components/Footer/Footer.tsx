@@ -9,33 +9,78 @@ const Footer = () => {
           <FooterColumn
             title="دسترسی سریع"
             items={[
-              "خانه",
-              "محصولات",
-              "درباره ما",
-              "تماس با ما",
-              "سوالات متداول",
+              {
+                title: "خانه",
+                href: "/",
+              },
+              {
+                title: "محصولات",
+                href: "/products",
+              },
+              {
+                title: "درباره ما",
+                href: "/about-us",
+              },
+              {
+                title: "تماس با ما",
+                href: "/contact-us",
+              },
+              {
+                title: "نمایندگی یاماسا",
+                href: "/yamasa",
+              },
             ]}
           />
 
           <FooterColumn
             title="دسته‌بندی‌ها"
             items={[
-              "ابزار تراشکاری",
-              "ابزار فرزکاری",
-              "فرز انگشتی",
-              "مته و سوراخکاری",
-              "قلاویز و رزوه‌زنی",
+              {
+                title: "ابزار تراشکاری",
+                href: "/products",
+              },
+              {
+                title: "ابزار فرزکاری",
+                href: "/products",
+              },
+              {
+                title: "فرز انگشتی",
+                href: "/products/end-mills",
+              },
+              {
+                title: "مته و سوراخکاری",
+                href: "/products/drills",
+              },
+              {
+                title: "قلاویز و رزوه‌زنی",
+                href: "/products/taps",
+              },
             ]}
           />
 
           <FooterColumn
             title="محصولات منتخب"
             items={[
-              "اینسرت تراشکاری کارباید",
-              "فرز انگشتی کارباید",
-              "مته صنعتی",
-              "هلدر تراشکاری",
-              "ابزارگیر CNC",
+              {
+                title: "اینسرت تراشکاری کارباید",
+                href: "/products?product=carbide-turning-insert",
+              },
+              {
+                title: "فرز انگشتی کارباید",
+                href: "/products?product=carbide-end-mill",
+              },
+              {
+                title: "مته صنعتی",
+                href: "/products?product=industrial-drill",
+              },
+              {
+                title: "هلدر تراشکاری",
+                href: "/products?product=turning-holder",
+              },
+              {
+                title: "ابزارگیر CNC",
+                href: "/products?product=cnc-tool-holder",
+              },
             ]}
           />
 

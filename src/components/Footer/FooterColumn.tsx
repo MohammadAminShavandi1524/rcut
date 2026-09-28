@@ -1,6 +1,13 @@
+import Link from "next/link";
+
+type FooterItem = {
+  title: string;
+  href: string;
+};
+
 type Props = {
   title: string;
-  items: string[];
+  items: FooterItem[];
 };
 
 const FooterColumn = ({ title, items }: Props) => {
@@ -10,11 +17,13 @@ const FooterColumn = ({ title, items }: Props) => {
 
       <ul className="text-footer-muted mt-6 space-y-4 text-sm">
         {items.map((item) => (
-          <li
-            key={item}
-            className="hover:text-custom-primary cursor-pointer transition-colors duration-300"
-          >
-            {item}
+          <li key={item.title}>
+            <Link
+              href={item.href}
+              className="hover:text-custom-primary transition-colors duration-300"
+            >
+              {item.title}
+            </Link>
           </li>
         ))}
       </ul>
