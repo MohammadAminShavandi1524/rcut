@@ -6,7 +6,7 @@ interface pageProps {}
 const page = ({}: pageProps) => {
   return (
     <>
-      <AboutPage />
+      {/* <AboutPage /> */}
       <AboutPage2 />
     </>
   );

@@ -10,8 +10,8 @@ const page = () => {
     <>
       <HeroCarousel />
       {/* <AboutIntro /> */}
-      <AboutIntro2 />
       <FeaturedProducts />
+      <AboutIntro2 />
       <NewProducts />
       <ShippingMethods />
     </>

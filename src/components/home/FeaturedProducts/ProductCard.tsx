@@ -38,7 +38,7 @@ const ProductCard = ({ product }: Props) => {
 
         <button
           type="button"
-          className="border-custom-primary text-custom-primary hover:bg-custom-primary mt-6.5 cursor-pointer rounded-lg border py-2.5 text-[15px] font-semibold transition-colors duration-300 hover:text-white"
+          className=" bg-custom-primary mt-6.5 cursor-pointer rounded-lg py-2.5 text-[15px] font-semibold transition-colors duration-300 text-white"
         >
           استعلام قیمت
         </button>
