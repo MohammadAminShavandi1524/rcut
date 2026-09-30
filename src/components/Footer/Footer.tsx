@@ -18,6 +18,10 @@ const Footer = () => {
                 href: "/products",
               },
               {
+                title: "نمایندگی یاماسا",
+                href: "/yamasa",
+              },
+              {
                 title: "درباره ما",
                 href: "/about-us",
               },
@@ -26,8 +30,8 @@ const Footer = () => {
                 href: "/contact-us",
               },
               {
-                title: "نمایندگی یاماسا",
-                href: "/yamasa",
+                title: "سوالات متداول",
+                href: "/faq",
               },
             ]}
           />

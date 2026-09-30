@@ -16,6 +16,8 @@ const Nav = () => {
         <NavItem label="درباره ما" href="/about-us" />
 
         <NavItem label="تماس با ما" href="/contact-us" />
+
+        <NavItem label="سوالات متداول" href="/faq" />
       </ul>
     </nav>
   );

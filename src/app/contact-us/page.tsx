@@ -8,7 +8,7 @@ interface pageProps {}
 const page = ({}: pageProps) => {
   return (
     <>
-      <ContactPage />
+      {/* <ContactPage /> */}
       <ContactPage3 />
     </>
   );
