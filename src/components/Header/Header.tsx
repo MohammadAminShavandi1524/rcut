@@ -57,7 +57,7 @@ const Header = () => {
           : "border-border",
       )}
     >
-      <div className="w90">
+      <div className="w90 max-lg:hidden">
         <div className="flex h-[100px] items-center justify-between gap-x-10">
           <div className="shrink-0">
             <Logo />

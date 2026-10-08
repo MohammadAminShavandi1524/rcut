@@ -4,7 +4,7 @@ import FooterBottom from "./FooterBottom";
 const Footer = () => {
   return (
     <footer className="bg-footer-bg text-footer-foreground" dir="rtl">
-      <div className="w90 py-20">
+      <div className="w90 py-20 max-lg:hidden">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           <FooterColumn
             title="دسترسی سریع"
