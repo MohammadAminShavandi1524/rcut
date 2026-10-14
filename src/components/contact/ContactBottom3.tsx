@@ -6,12 +6,12 @@ import { Mail, Smartphone } from "lucide-react";
 const socials = [
   {
     name: "Instagram",
-    icon: "/socials/insta.png",
+    icon: "/socials/insta.webp",
     href: "#",
   },
   {
     name: "WhatsApp",
-    icon: "/socials/whatsapp.jpg",
+    icon: "/socials/whatsapp.webp",
     href: "#",
   },
   {
@@ -21,7 +21,7 @@ const socials = [
   },
   {
     name: "Eitaa",
-    icon: "/socials/eita.png",
+    icon: "/socials/eita.webp",
     href: "#",
   },
 ];

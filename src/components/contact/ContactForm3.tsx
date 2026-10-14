@@ -3,6 +3,8 @@
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import { Send } from "lucide-react";
+import { useState } from "react";
+import { useCustomToast } from "../ui/custom-toast";
 
 type ContactFormValues = {
   name: string;
@@ -28,9 +30,59 @@ const ContactForm3 = () => {
     },
   });
 
-  const onSubmit = (data: ContactFormValues) => {
-    console.log("CONTACT FORM:", data);
-    reset();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const toast = useCustomToast();
+
+  const onSubmit = async (data: ContactFormValues) => {
+    try {
+      setIsSubmitting(true);
+
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+      if (!API_URL) {
+        throw new Error("NEXT_PUBLIC_API_URL is not defined");
+      }
+
+      const response = await fetch(`${API_URL}/support/contact`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          full_name: data.name,
+          phone_number: data.phone,
+          email: data.email,
+          message: data.message,
+        }),
+      });
+
+      const text = await response.text();
+
+      let responseData: unknown = null;
+
+      if (text) {
+        try {
+          responseData = JSON.parse(text);
+        } catch {
+          responseData = text;
+        }
+      }
+
+      if (!response.ok) {
+        throw responseData;
+      }
+
+      reset();
+
+      toast.success("پیام شما با موفقیت ارسال شد.");
+    } catch (error) {
+      console.error("CREATE CONTACT ERROR:", error);
+
+      toast.error("ارسال پیام با خطا مواجه شد.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -182,18 +234,13 @@ const ContactForm3 = () => {
           </div>
         </div>
 
-        {isSubmitSuccessful && (
-          <div className="border-custom-primary/20 bg-custom-primary/5 text-custom-primary mt-6 rounded-lg border px-4 py-3 text-sm">
-            پیام شما با موفقیت ثبت شد.
-          </div>
-        )}
-
         <div className="mt-7 flex justify-stretch sm:mt-8 sm:justify-end">
           <button
             type="submit"
-            className="bg-custom-primary inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-lg px-6 text-[15px] font-medium text-white transition-opacity duration-300 hover:opacity-90 sm:min-w-[170px] sm:w-auto"
+            disabled={isSubmitting}
+            className="bg-custom-primary inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-lg px-6 text-[15px] font-medium text-white transition-opacity duration-300 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[170px]"
           >
-            <span>ارسال پیام</span>
+            <span>{isSubmitting ? "در حال ارسال..." : "ارسال پیام"}</span>
             <Send size={18} strokeWidth={1.8} />
           </button>
         </div>
