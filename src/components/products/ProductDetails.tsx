@@ -28,7 +28,7 @@ const ProductDetails = ({ product }: Props) => {
         {/* Breadcrumb */}
         <nav
           aria-label="مسیر صفحه"
-          className="flex flex-wrap items-center gap-x-2 gap-y-3 text-sm ms-1.5"
+          className="ms-1.5 flex flex-wrap items-center gap-x-2 gap-y-3 text-sm"
         >
           <Link
             href="/"
@@ -121,12 +121,12 @@ const ProductDetails = ({ product }: Props) => {
               </div>
 
               <div className="border-border mt-10 border-t pt-6">
-                <button
-                  type="button"
+                <Link
+                  href="tel:09192081368"
                   className="border-custom-primary text-custom-primary hover:bg-custom-primary flex min-h-11 w-full cursor-pointer items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-semibold transition-colors duration-300 hover:text-white"
                 >
                   استعلام قیمت
-                </button>
+                </Link>
               </div>
             </div>
 

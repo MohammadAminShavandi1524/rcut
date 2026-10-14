@@ -1,28 +1,29 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Mail, Smartphone } from "lucide-react";
 
 const socials = [
   {
     name: "Instagram",
     icon: "/socials/insta.webp",
-    href: "#",
+    href: "https://www.instagram.com/abzar.tarash.rasooli?igsi=YnNpanVoOGtocnNs",
   },
   {
     name: "WhatsApp",
     icon: "/socials/whatsapp.webp",
-    href: "#",
+    href: "https://wa.me/989192081368",
   },
   {
     name: "Bale",
     icon: "/socials/bale.webp",
-    href: "#",
+    href: "",
   },
   {
     name: "Eitaa",
     icon: "/socials/eita.webp",
-    href: "#",
+    href: "",
   },
 ];
 
@@ -85,22 +86,40 @@ const ContactBottom3 = () => {
         </p>
 
         <div className="mt-5 flex items-center gap-4 sm:mt-6 sm:gap-5.25">
-          {socials.map((item) => (
-            <a
-              key={item.name}
-              href={item.href}
-              aria-label={item.name}
-              className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md sm:size-8.5"
-            >
-              <Image
-                src={item.icon}
-                alt={item.name}
-                fill
-                sizes="34px"
-                className="object-contain"
-              />
-            </a>
-          ))}
+          {socials.map((item) =>
+            item.href ? (
+              <Link
+                key={item.name}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={item.name}
+                className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md sm:size-8.5"
+              >
+                <Image
+                  src={item.icon}
+                  alt={item.name}
+                  fill
+                  sizes="34px"
+                  className="object-contain"
+                />
+              </Link>
+            ) : (
+              <span
+                key={item.name}
+                aria-label={item.name}
+                className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md sm:size-8.5"
+              >
+                <Image
+                  src={item.icon}
+                  alt={item.name}
+                  fill
+                  sizes="34px"
+                  className="object-contain"
+                />
+              </span>
+            ),
+          )}
         </div>
       </div>
     </div>

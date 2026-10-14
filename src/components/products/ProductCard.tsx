@@ -71,13 +71,14 @@ const ProductCard = ({ product, showCategory = true }: Props) => {
           </p>
         </Link>
 
+      
         {/* Price Inquiry */}
-        <button
-          type="button"
+        <Link
+          href="tel:09192081368"
           className="border-custom-primary text-custom-primary hover:bg-custom-primary flex min-h-11 w-full cursor-pointer items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-semibold transition-colors duration-300 hover:text-white"
         >
           استعلام قیمت
-        </button>
+        </Link>
       </div>
     </article>
   );

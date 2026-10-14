@@ -47,12 +47,12 @@ const ProductCard = ({ product }: Props) => {
         </Link>
 
         <div className="mt-auto pt-6.5">
-          <button
-            type="button"
-            className="bg-custom-primary w-full cursor-pointer rounded-lg py-2.5 text-[15px] font-semibold text-white transition-colors duration-300"
+          <Link
+            href="tel:09192081368"
+            className="bg-custom-primary block w-full cursor-pointer rounded-lg py-2.5 text-center text-[15px] font-semibold text-white transition-colors duration-300"
           >
             استعلام قیمت
-          </button>
+          </Link>
         </div>
       </div>
     </article>
