@@ -8,7 +8,7 @@ const ease = [0.16, 1, 0.3, 1] as const;
 const AboutPage2 = () => {
   return (
     <main dir="rtl" className="bg-background min-h-screen overflow-hidden">
-      <section className="flex min-h-[70vh] items-center justify-center px-10 py-20  md:py-24">
+      <section className="flex min-h-[70vh] items-center justify-center px-4 py-10 sm:px-6 sm:py-14 md:px-10 md:py-16">
         <motion.div
           initial={{
             opacity: 0,
@@ -22,22 +22,18 @@ const AboutPage2 = () => {
             duration: 0.7,
             ease,
           }}
-          className="border-border w-full max-w-[1100px] rounded-2xl border py-12 text-center  md:py-16 px-16 xl:py-20"
+          className="border-border w-full max-w-[1100px] rounded-2xl border px-4 py-8 text-center sm:px-6 sm:py-10 md:px-10 md:py-16 lg:px-12 xl:px-16 xl:py-20"
         >
-          <h1 className="text-foreground text-4xl font-bold md:text-5xl xl:text-6xl">
+          <h1 className="text-foreground text-3xl font-bold sm:text-4xl md:text-5xl xl:text-6xl">
             درباره ما
           </h1>
-          {/* 
-          <p className="text-muted-foreground mx-auto mt-6 max-w-3xl text-sm leading-8 md:text-base md:leading-9">
-            مرجع تامین ابزارهای تخصصی ماشین‌کاری و تجهیزات صنعتی
-          </p> */}
 
-          <p className="text-foreground mt-6 text-xl font-bold md:text-2xl">
+          <p className="text-foreground mt-4 text-lg font-bold sm:mt-5 sm:text-xl md:mt-6 md:text-2xl">
             آرکات؛{" "}
             <span className="text-custom-primary">دقت، کیفیت، اعتماد</span>
           </p>
 
-          <div className="text-foreground mx-auto mt-12 max-w-[960px] space-y-8 text-base leading-9 md:text-lg md:leading-10">
+          <div className="text-foreground mx-auto mt-8 max-w-[960px] space-y-5 text-justify text-sm leading-7 sm:mt-10 sm:space-y-6 sm:text-base sm:leading-8 md:mt-12 md:space-y-8 md:text-start md:text-lg md:leading-10">
             <p>
               آرکات با هدف تامین ابزارهای تخصصی تراشکاری، قالب‌سازی و CNC فعالیت
               خود را آغاز کرده است. ما تلاش می‌کنیم با ارائه محصولات باکیفیت از
@@ -54,30 +50,41 @@ const AboutPage2 = () => {
             </p>
           </div>
 
-          <div className="border-border mt-12 flex items-center justify-center gap-x-6 border-t pt-8">
-            {/* box 1 */}
-            <div className="flex w-65 items-center rounded-md border border-white bg-[#d59b27] px-5 py-3 text-white">
-              <span>
-                <Handshake className="size-12" />
+          <div className="border-border mt-8 grid grid-cols-1 gap-3 border-t pt-6 sm:mt-10 sm:gap-4 sm:pt-7 md:mt-12 md:grid-cols-3 md:gap-4 md:pt-8">
+            <div className="flex w-full items-center rounded-md border border-white bg-[#d59b27] px-4 py-3 text-white sm:px-5">
+              <span className="shrink-0">
+                <Handshake className="size-9 sm:size-10 lg:size-12" />
               </span>
-              <span className="mx-4 h-14 w-0.75 rounded-lg bg-white"></span>
-              <span className="">30 سال همراهی با صنعت‌گران </span>
+
+              <span className="mx-3 h-12 w-0.75 shrink-0 rounded-lg bg-white sm:mx-4 sm:h-14" />
+
+              <span className="text-right text-sm leading-6 sm:text-base">
+                30 سال همراهی با صنعت‌گران
+              </span>
             </div>
-            {/* box 2 */}
-            <div className="flex w-60 items-center rounded-md border border-white bg-[#d59b27] px-5 py-3 text-white">
-              <span>
-                <Headset className="size-12" />
+
+            <div className="flex w-full items-center rounded-md border border-white bg-[#d59b27] px-4 py-3 text-white sm:px-5">
+              <span className="shrink-0">
+                <Headset className="size-9 sm:size-10 lg:size-12" />
               </span>
-              <span className="mx-4 h-14 w-0.75 rounded-lg bg-white"></span>
-              <span className=""> خدمات پس از فروش تخصصی </span>
+
+              <span className="mx-3 h-12 w-0.75 shrink-0 rounded-lg bg-white sm:mx-4 sm:h-14" />
+
+              <span className="text-right text-sm leading-6 sm:text-base">
+                خدمات پس از فروش تخصصی
+              </span>
             </div>
-            {/* box 3 */}
-            <div className="flex w-60 items-center rounded-md border border-white bg-[#d59b27] px-5 py-3 text-white">
-              <span>
-                <ShieldCheck className="size-12" />
+
+            <div className="flex w-full items-center rounded-md border border-white bg-[#d59b27] px-4 py-3 text-white sm:px-5">
+              <span className="shrink-0">
+                <ShieldCheck className="size-9 sm:size-10 lg:size-12" />
               </span>
-              <span className="mx-4 h-14 w-0.75 rounded-lg bg-white"></span>
-              <span className="">مرجع ابزارآلات اصل اروپایی</span>
+
+              <span className="mx-3 h-12 w-0.75 shrink-0 rounded-lg bg-white sm:mx-4 sm:h-14" />
+
+              <span className="text-right text-sm leading-6 sm:text-base">
+                مرجع ابزارآلات اصل اروپایی
+              </span>
             </div>
           </div>
         </motion.div>
