@@ -2,25 +2,41 @@ export function YamasaIntro() {
   return (
     <section className="border-border border-b pb-8 md:pb-10">
       <h1 className="mb-6 text-2xl leading-tight font-bold md:mb-8 md:text-4xl">
-        نمایندگی یاماسا در RCUT
+        یاماسا (YAMASA) | تخصص در رولربرنیشینگ صنعتی
       </h1>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-10">
+      <div className="space-y-5">
         <p className="text-muted-foreground text-sm leading-7 sm:leading-8 md:text-base">
-          یاماسا (YAMASA) با سابقه فعالیت از سال ۱۹۵۸، یکی از تولیدکنندگان تخصصی
-          ابزارهای صنعتی در زمینه Roller Burnishing، Skive-Burnishing و Deep
-          Rolling است. این شرکت با تکیه بر دانش فنی، نیروی متخصص و توسعه مستمر
-          فناوری، ابزارهایی برای پرداخت دقیق سطوح فلزی و بهبود کیفیت سطح قطعات
-          تولید می‌کند.
+          شرکت YAMASA ترکیه از تولیدکنندگان تخصصی تجهیزات و ابزارهای
+          رولربرنیشینگ است. ما با افتخار به‌عنوان تنها نمایندگی این برند در
+          ایران، با ۱۵ سال سابقه همکاری، تأمین‌کننده ابزارها و تجهیزات تخصصی
+          یاماسا برای صنایع کشور هستیم.
         </p>
 
         <p className="text-muted-foreground text-sm leading-7 sm:leading-8 md:text-base">
-          ابزارهای یاماسا در صنایع مختلفی از جمله خودروسازی، هوافضا، هیدرولیک و
-          پنوماتیک، تولید لوله‌های دقیق و ماشین‌سازی کاربرد دارند. در RCUT،
-          محصولات این برند تخصصی را به مشتریان و فعالان صنعت عرضه می‌کنیم تا
-          بتوانند متناسب با نیازهای تولیدی خود، راهکار و ابزار مناسب را انتخاب
-          کنند.
+          محصولات یاماسا با هدف بهبود کیفیت سطح، افزایش مقاومت قطعات در برابر
+          خستگی و دستیابی به دقت بالاتر در فرآیندهای تولید طراحی شده‌اند و در
+          صنایع مختلفی از جمله خودروسازی، ماشین‌سازی، نفت و گاز و قطعه‌سازی
+          کاربرد دارند.
         </p>
+
+        <p className="text-foreground text-base leading-8 font-semibold md:text-lg">
+          ۱۵ سال تجربه، تأمین تخصصی و همراهی با صنعت ایران.
+        </p>
+
+        <p className="text-muted-foreground text-sm leading-7 sm:leading-8 md:text-base">
+          برای دریافت اطلاعات فنی و مشاوره انتخاب محصولات یاماسا، با ما تماس
+          بگیرید.
+        </p>
+
+        <div className="pt-2">
+          <button
+            type="button"
+            className="bg-custom-primary text-primary-foreground hover:bg-custom-primary/90 inline-flex h-11 items-center justify-center rounded-lg px-6 text-sm font-medium transition-colors cursor-pointer"
+          >
+            دانلود کاتالوگ یاماسا
+          </button>
+        </div>
       </div>
     </section>
   );
