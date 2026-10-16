@@ -22,30 +22,33 @@ const technologies = [
 export function YamasaTechnologies() {
   return (
     <section aria-labelledby="yamasa-technologies">
-      <div className="mb-7 flex flex-col gap-2 sm:mb-8">
-        <h2 id="yamasa-technologies" className="text-2xl font-bold md:text-3xl">
+      <div className="mb-5 flex flex-col gap-2 sm:mb-6 md:mb-8">
+        <h2
+          id="yamasa-technologies"
+          className="text-xl font-bold sm:text-2xl md:text-3xl"
+        >
           فناوری‌های تخصصی یاماسا
         </h2>
 
-        <p className="text-muted-foreground max-w-2xl text-sm leading-7 md:text-base">
+        <p className="text-muted-foreground max-w-2xl text-justify text-sm leading-7 md:text-start md:text-base">
           یاماسا در زمینه طراحی و تولید ابزارهای تخصصی پرداخت و بهبود سطح قطعات
           فلزی فعالیت می‌کند.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3">
         {technologies.map((technology) => (
           <article
             key={technology.title}
-            className="group border-border bg-card hover:border-custom-primary flex h-full min-w-0 flex-col rounded-xl border p-5 transition-colors duration-200 md:p-6"
+            className="group border-border bg-card hover:border-custom-primary flex h-full min-w-0 flex-col rounded-xl border p-4 transition-colors duration-200 sm:p-5 md:p-6"
           >
-            <div className="mb-3">
-              <p className="text-custom-primary mt-2 text-lg font-medium">
+            <div className="mb-2 sm:mb-3">
+              <p className="text-custom-primary mt-1 text-base font-medium sm:mt-2 sm:text-lg">
                 {technology.subtitle}
               </p>
             </div>
 
-            <p className="text-muted-foreground text-sm leading-7 md:text-base md:leading-9">
+            <p className="text-muted-foreground text-justify text-sm leading-7 md:text-start md:text-base md:leading-9">
               {technology.description}
             </p>
           </article>
