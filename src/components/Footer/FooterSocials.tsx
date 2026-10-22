@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -18,9 +19,9 @@ const socials = [
     href: "",
   },
   {
-    name: "Eitaa",
-    icon: "/socials/eita.webp",
-    href: "",
+    name: "Telegram",
+    icon: "/socials/Telegram_logo.webp",
+    href: "https://t.me/abzar_tarash_rassoli",
   },
 ];
 
@@ -35,7 +36,10 @@ const FooterSocials = () => {
             target="_blank"
             rel="noopener noreferrer"
             aria-label={item.name}
-            className="flex items-center justify-center overflow-hidden rounded-md"
+            className={cn(
+              "flex items-center justify-center overflow-hidden rounded-md",
+              item.name === "WhatsApp" && "bg-background",
+            )}
           >
             <Image
               src={item.icon}
