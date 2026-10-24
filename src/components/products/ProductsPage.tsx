@@ -7,11 +7,16 @@ import Link from "next/link";
 
 import ProductCard from "./ProductCard";
 import ProductsFilters from "./ProductsFilters";
+
+import { products, type CategorySlug } from "./products.data";
+
 import {
-  productCategories,
-  products,
-  type CategorySlug,
-} from "./products.data";
+  findCategoryByKey,
+  findCategoryById,
+  getCategoryPath,
+  getLeafCategoryIds,
+  matchesCategoryFilter,
+} from "./products.categories";
 
 type Props = {
   categorySlug?: CategorySlug;
@@ -22,16 +27,62 @@ const ProductsPage = ({ categorySlug }: Props) => {
 
   const sort = searchParams.get("sort") || "newest";
 
-  const selectedCategories =
-    searchParams.get("categories")?.split(",").filter(Boolean) ?? [];
+  const categoriesParam = searchParams.get("categories") ?? "";
+
+  const scopeParam = searchParams.get("scope");
 
   const bestSellerOnly = searchParams.get("bestSeller") === "1";
 
   const selectedProduct = searchParams.get("product");
 
-  const activeCategory = categorySlug
-    ? productCategories.find((item) => item.slug === categorySlug)
-    : undefined;
+  // دسته‌بندی انتخاب‌شده از Dropdown یا Footer
+  const scopeCategory = scopeParam
+    ? findCategoryByKey(scopeParam)
+    : categorySlug
+      ? findCategoryByKey(categorySlug)
+      : undefined;
+
+  // تمام دسته‌بندی‌های نهایی متعلق به Scope
+  const scopeLeafIds = useMemo(
+    () => (scopeCategory ? getLeafCategoryIds(scopeCategory) : []),
+    [scopeCategory],
+  );
+
+  // مسیر سلسله‌مراتبی Breadcrumb
+  const breadcrumbCategories = scopeCategory
+    ? getCategoryPath(scopeCategory.id)
+    : [];
+
+  // دسته‌بندی‌هایی که داخل فیلتر انتخاب شده‌اند
+  const selectedCategoryIds = useMemo(() => {
+    const ids = [
+      ...new Set(
+        categoriesParam
+          .split(",")
+          .filter(Boolean)
+          .map((value) => findCategoryByKey(value)?.id)
+          .filter((id): id is number => id !== undefined),
+      ),
+    ];
+
+    if (!scopeCategory) {
+      return ids;
+    }
+
+    // فقط دسته‌بندی‌های متعلق به Scope مجازند
+    const filteredIds = ids.filter((id) => {
+      const category = findCategoryById(id);
+
+      if (!category) return false;
+
+      return getLeafCategoryIds(category).every((leafId) =>
+        scopeLeafIds.includes(leafId),
+      );
+    });
+
+    // اگر فیلتر اختصاصی انتخاب نشده، کل Scope نمایش داده می‌شود
+    return filteredIds.length > 0 ? filteredIds : [scopeCategory.id];
+  }, [categoriesParam, scopeCategory, scopeLeafIds]);
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -41,31 +92,35 @@ const ProductsPage = ({ categorySlug }: Props) => {
       result = result.filter((product) => product.slug === selectedProduct);
     }
 
-    // Category page
-    if (categorySlug) {
-      const category = productCategories.find(
-        (item) => item.slug === categorySlug,
+    // Scope Filter
+    // انتخاب دسته‌بندی از Dropdown یا Footer
+    if (scopeCategory) {
+      result = result.filter((product) =>
+        scopeLeafIds.includes(product.categoryId),
       );
+    }
+
+    // Category Page Filter
+    if (categorySlug && !scopeParam) {
+      const category = findCategoryByKey(categorySlug);
 
       if (category) {
-        result = result.filter(
-          (product) => product.category === category.title,
+        const leafIds = getLeafCategoryIds(category);
+
+        result = result.filter((product) =>
+          leafIds.includes(product.categoryId),
         );
       }
     }
 
-    // Category filter
-    if (selectedCategories.length > 0) {
-      result = result.filter((product) => {
-        const category = productCategories.find(
-          (item) => item.title === product.category,
-        );
-
-        return category && selectedCategories.includes(category.slug);
-      });
+    // Category Checkbox Filters
+    if (selectedCategoryIds.length > 0) {
+      result = result.filter((product) =>
+        matchesCategoryFilter(product.categoryId, selectedCategoryIds),
+      );
     }
 
-    // Best seller filter
+    // Best Seller Filter
     if (bestSellerOnly) {
       result = result.filter((product) => product.isBestSeller);
     }
@@ -82,17 +137,27 @@ const ProductsPage = ({ categorySlug }: Props) => {
     });
 
     return result;
-  }, [categorySlug, selectedCategories, bestSellerOnly, sort, selectedProduct]);
+  }, [
+    categorySlug,
+    scopeParam,
+    scopeCategory,
+    scopeLeafIds,
+    selectedCategoryIds,
+    bestSellerOnly,
+    sort,
+    selectedProduct,
+  ]);
 
-  // وقتی فقط یک دسته‌بندی انتخاب شده باشد،
-  // دسته‌بندی داخل کارت محصول نمایش داده نمی‌شود.
-  const showProductCategory = selectedCategories.length !== 1;
+  const showProductCategory = selectedCategoryIds.length !== 1;
 
   return (
     <main dir="rtl" className="bg-background min-h-screen">
       <section className="w90 mx-auto py-8 lg:px-10">
         {/* Breadcrumb */}
-        <nav className="ms-2 flex items-center gap-2 text-sm">
+        <nav
+          aria-label="مسیر صفحه"
+          className="ms-2 flex flex-wrap items-center gap-2 text-sm"
+        >
           <Link
             href="/"
             className="text-muted-foreground hover:text-custom-primary transition-colors duration-300"
@@ -100,26 +165,54 @@ const ProductsPage = ({ categorySlug }: Props) => {
             آرکات
           </Link>
 
-          <ChevronLeft size={15} className="text-muted-foreground" />
+          <ChevronLeft
+            size={15}
+            aria-hidden="true"
+            className="text-muted-foreground shrink-0"
+          />
 
-          <Link
-            href="/products"
-            className={`transition-colors duration-300 ${
-              activeCategory
-                ? "text-muted-foreground hover:text-custom-primary"
-                : "text-foreground font-medium"
-            }`}
-          >
-            محصولات
-          </Link>
-
-          {activeCategory && (
+          {breadcrumbCategories.length === 0 ? (
+            <span aria-current="page" className="text-foreground font-medium">
+              محصولات
+            </span>
+          ) : (
             <>
-              <ChevronLeft size={15} className="text-muted-foreground" />
+              <Link
+                href="/products"
+                className="text-muted-foreground hover:text-custom-primary transition-colors duration-300"
+              >
+                محصولات
+              </Link>
 
-              <span className="text-custom-primary font-medium">
-                {activeCategory.title}
-              </span>
+              {breadcrumbCategories.map((category, index) => {
+                const isLast = index === breadcrumbCategories.length - 1;
+
+                return (
+                  <div key={category.id} className="flex items-center gap-2">
+                    <ChevronLeft
+                      size={15}
+                      aria-hidden="true"
+                      className="text-muted-foreground shrink-0"
+                    />
+
+                    {isLast ? (
+                      <span
+                        aria-current="page"
+                        className="text-custom-primary font-medium"
+                      >
+                        {category.name}
+                      </span>
+                    ) : (
+                      <Link
+                        href={`/products?scope=${category.id}&categories=${category.id}`}
+                        className="text-muted-foreground hover:text-custom-primary transition-colors duration-300"
+                      >
+                        {category.name}
+                      </Link>
+                    )}
+                  </div>
+                );
+              })}
             </>
           )}
         </nav>

@@ -3,24 +3,60 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
 import RelatedProducts from "./RelatedProducts";
-import { productCategories, products, type Product } from "./products.data";
+import { products, type Product } from "./products.data";
+
+import {
+  getCategoryPath,
+  getLeafCategoryIds,
+} from "./products.categories";
 
 type Props = {
   product: Product;
 };
 
 const ProductDetails = ({ product }: Props) => {
-  const category = productCategories.find(
-    (item) => item.title === product.category,
-  );
+  // Full category hierarchy for breadcrumb
+  const categoryPath = getCategoryPath(product.categoryId);
 
-  const categoryHref = category
-    ? `/products?categories=${category.slug}`
+  const leafCategory = categoryPath.at(-1);
+
+  const categoryHref = leafCategory
+    ? `/products?scope=${leafCategory.id}&categories=${leafCategory.id}`
     : "/products";
 
-  const relatedProducts = products.filter(
-    (item) => item.category === product.category && item.id !== product.id,
-  );
+  const categoryName = leafCategory?.name ?? product.category;
+
+  // First show products from the same leaf category.
+  // Then include products from sibling categories.
+  const parentCategory =
+    categoryPath.length > 1
+      ? categoryPath[categoryPath.length - 2]
+      : leafCategory;
+
+  const relatedCategoryIds = parentCategory
+    ? getLeafCategoryIds(parentCategory)
+    : [];
+
+  const relatedProducts = products
+    .filter(
+      (item) =>
+        item.id !== product.id &&
+        relatedCategoryIds.includes(item.categoryId),
+    )
+    .sort((a, b) => {
+      const aSame = a.categoryId === product.categoryId;
+      const bSame = b.categoryId === product.categoryId;
+
+      if (aSame !== bSame) {
+        return aSame ? -1 : 1;
+      }
+
+      return (
+        new Date(b.created).getTime() -
+        new Date(a.created).getTime()
+      );
+    })
+    .slice(0, 10);
 
   return (
     <main dir="rtl" className="bg-background">
@@ -50,26 +86,36 @@ const ProductDetails = ({ product }: Props) => {
             محصولات
           </Link>
 
+          {categoryPath.map((category) => (
+            <div
+              key={category.id}
+              className="flex items-center gap-x-2"
+            >
+              <ChevronLeft
+                size={15}
+                aria-hidden="true"
+                className="text-muted-foreground shrink-0"
+              />
+
+              <Link
+                href={`/products?scope=${category.id}&categories=${category.id}`}
+                className="text-muted-foreground hover:text-custom-primary transition-colors"
+              >
+                {category.name}
+              </Link>
+            </div>
+          ))}
+
           <ChevronLeft
             size={15}
             aria-hidden="true"
             className="text-muted-foreground shrink-0"
           />
 
-          <Link
-            href={categoryHref}
-            className="text-muted-foreground hover:text-custom-primary transition-colors"
+          <span
+            aria-current="page"
+            className="text-foreground font-medium"
           >
-            {product.category}
-          </Link>
-
-          <ChevronLeft
-            size={15}
-            aria-hidden="true"
-            className="text-muted-foreground shrink-0"
-          />
-
-          <span aria-current="page" className="text-foreground font-medium">
             {product.name}
           </span>
         </nav>
@@ -100,13 +146,15 @@ const ProductDetails = ({ product }: Props) => {
               </h1>
 
               <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-                <span className="text-muted-foreground">دسته‌بندی:</span>
+                <span className="text-muted-foreground">
+                  دستهبندی:
+                </span>
 
                 <Link
                   href={categoryHref}
                   className="text-custom-primary hover:text-foreground font-medium transition-colors"
                 >
-                  {product.category}
+                  {categoryName}
                 </Link>
               </div>
 
@@ -147,7 +195,10 @@ const ProductDetails = ({ product }: Props) => {
         </article>
 
         {/* Related Products */}
-        <RelatedProducts key={product.id} products={relatedProducts} />
+        <RelatedProducts
+          key={product.id}
+          products={relatedProducts}
+        />
       </section>
     </main>
   );

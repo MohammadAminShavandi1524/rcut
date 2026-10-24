@@ -6,117 +6,26 @@ import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
-
-type CategoryItem = {
-  title: string;
-  href?: string;
-  children?: CategoryItem[];
-};
-
-const categories: CategoryItem[] = [
-  {
-    title: "اینسرت",
-    href: "/products?categories=diamond",
-    children: [
-      {
-        title: "اینسرت تراشکاری",
-        children: [
-          { title: "DNMG" },
-          { title: "CNMG" },
-          { title: "VBMT" },
-          { title: "DCMT" },
-        ],
-      },
-      {
-        title: "اینسرت فرز",
-        children: [
-          { title: "TPK" },
-          { title: "NAPKT" },
-          { title: "SPKN" },
-          { title: "LNMU" },
-        ],
-      },
-      { title: "اینسرت دنده‌زنی" },
-      { title: "اینسرت جوشی" },
-    ],
-  },
-  {
-    title: "هولدر",
-    href: "/products?categories=holders",
-    children: [
-      { title: "داخل تراش" },
-      { title: "رو تراش" },
-      { title: "برش" },
-      { title: "پیشونی تراش" },
-      { title: "کف تراش" },
-    ],
-  },
-  {
-    title: "فرز انگشتی",
-    href: "/products?categories=end-mills",
-    children: [
-      { title: "فرز انگشتی چهار پر" },
-      { title: "فرز انگشتی بالنوز" },
-      { title: "فرز انگشتی تمام الماس" },
-      { title: "فرز انگشتی دو پر" },
-      { title: "فرز انگشتی تیپ" },
-    ],
-  },
-  {
-    title: "مته",
-    href: "/products?categories=drills",
-    children: [
-      { title: "مته HSS" },
-      { title: "مته کبالت" },
-      { title: "مته ته کونیک" },
-      { title: "مته تمام الماس" },
-      { title: "مته بلند" },
-    ],
-  },
-  {
-    title: "قلاویز",
-    href: "/products?categories=taps",
-    children: [
-      { title: "قلاویز ماشینی" },
-      { title: "قلاویز دستی" },
-      { title: "قلاویز اینچ" },
-    ],
-  },
-  {
-    title: "لوازم اندازه‌گیری",
-    href: "/products?categories=measuring",
-    children: [
-      { title: "کولیس" },
-      { title: "میکرومتر" },
-      { title: "ساعت اندیکاتور" },
-      { title: "ساعت شیطونکی" },
-      { title: "پایه ساعت" },
-    ],
-  },
-  {
-    title: "برند یاماسا",
-    href: "/yamasa",
-    children: [
-      { title: "رولربرنشینگ" },
-      { title: "ساچمه" },
-      { title: "کاورمیل" },
-      { title: "کندنباله رولر برنشینگ" },
-    ],
-  },
-];
+import {
+  categoryTree,
+  type CategoryNode,
+} from "@/components/products/products.categories";
 
 type CategoryMenuProps = {
-  items: CategoryItem[];
-  fallbackHref: string;
+  items: CategoryNode[];
   isVisible?: boolean;
 };
 
-function CategoryMenu({
-  items,
-  fallbackHref,
-  isVisible = true,
-}: CategoryMenuProps) {
-  const [openItem, setOpenItem] = useState<string | null>(null);
+function getCategoryHref(category: CategoryNode) {
+  if (category.slug === "yamasa") {
+    return "/yamasa";
+  }
+
+  return `/products?scope=${category.id}&categories=${category.id}`;
+}
+
+function CategoryMenu({ items, isVisible = true }: CategoryMenuProps) {
+  const [openItem, setOpenItem] = useState<number | null>(null);
   const [submenuSide, setSubmenuSide] = useState<"left" | "right">("left");
   const [submenuTop, setSubmenuTop] = useState(0);
 
@@ -131,7 +40,7 @@ function CategoryMenu({
       return;
     }
 
-    if (!openItem || !activeItemRef.current || !submenuRef.current) {
+    if (openItem === null || !activeItemRef.current || !submenuRef.current) {
       return;
     }
 
@@ -149,7 +58,7 @@ function CategoryMenu({
     setSubmenuTop(targetTop - anchorRect.top);
   }, [openItem, isVisible]);
 
-  const handleItemEnter = (category: CategoryItem, element: HTMLDivElement) => {
+  const handleItemEnter = (category: CategoryNode, element: HTMLDivElement) => {
     if (!category.children?.length) {
       setOpenItem(null);
       setSubmenuTop(0);
@@ -168,7 +77,7 @@ function CategoryMenu({
 
     activeItemRef.current = element;
     setSubmenuTop(0);
-    setOpenItem(category.title);
+    setOpenItem(category.id);
   };
 
   const closeSubmenu = () => {
@@ -180,13 +89,13 @@ function CategoryMenu({
   return (
     <div className="w-full space-y-0.5">
       {items.map((category) => {
-        const href = category.href ?? fallbackHref;
+        const href = getCategoryHref(category);
         const hasChildren = Boolean(category.children?.length);
-        const isOpen = openItem === category.title;
+        const isOpen = openItem === category.id;
 
         return (
           <div
-            key={category.title}
+            key={category.id}
             className="relative w-full"
             onMouseEnter={(event) =>
               handleItemEnter(category, event.currentTarget)
@@ -197,12 +106,13 @@ function CategoryMenu({
               href={href}
               aria-haspopup={hasChildren ? true : undefined}
               aria-expanded={hasChildren ? isOpen : undefined}
-              onFocus={(event) =>
-                handleItemEnter(
-                  category,
-                  event.currentTarget.parentElement as HTMLDivElement,
-                )
-              }
+              onFocus={(event) => {
+                const parent = event.currentTarget.parentElement;
+
+                if (parent instanceof HTMLDivElement) {
+                  handleItemEnter(category, parent);
+                }
+              }}
               className={cn(
                 "group/item text-foreground/80 relative flex h-[42px] w-full",
                 "items-center justify-start gap-2 rounded-md px-3.5",
@@ -221,9 +131,7 @@ function CategoryMenu({
                 )}
               />
 
-              <span className="min-w-0 flex-1 text-right">
-                {category.title}
-              </span>
+              <span className="min-w-0 flex-1 text-right">{category.name}</span>
 
               {hasChildren &&
                 (isOpen && submenuSide === "right" ? (
@@ -255,7 +163,7 @@ function CategoryMenu({
                     : "pointer-events-none invisible opacity-0",
                 )}
               >
-                {/* ناحیه نامرئی برای عبور موس از فاصله ۸ پیکسلی */}
+                {/* ناحیه عبور موس بین دو منو */}
                 <div
                   aria-hidden="true"
                   className={cn(
@@ -265,11 +173,7 @@ function CategoryMenu({
                 />
 
                 <div className="bg-background border-border relative w-[210px] rounded-lg border p-2 shadow-[0_10px_30px_rgba(0,0,0,0.09)]">
-                  <CategoryMenu
-                    items={category.children!}
-                    fallbackHref={href}
-                    isVisible={isOpen}
-                  />
+                  <CategoryMenu items={category.children!} isVisible={isOpen} />
                 </div>
               </div>
             )}
@@ -307,7 +211,7 @@ const ProductsDropdown = () => {
         )}
       >
         <div className="bg-background border-border w-[210px] rounded-lg border p-2 shadow-[0_10px_30px_rgba(0,0,0,0.09)]">
-          <CategoryMenu items={categories} fallbackHref="/products" />
+          <CategoryMenu items={categoryTree} />
         </div>
       </div>
     </li>

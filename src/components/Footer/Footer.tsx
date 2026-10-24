@@ -41,23 +41,23 @@ const Footer = () => {
             items={[
               {
                 title: "ابزار تراشکاری",
-                href: "/products",
+                href: "/products?scope=1&categories=1",
               },
               {
                 title: "ابزار فرزکاری",
-                href: "/products",
+                href: "/products?scope=12&categories=12",
               },
               {
                 title: "فرز انگشتی",
-                href: "/products/end-mills",
+                href: "/products?scope=3&categories=3",
               },
               {
                 title: "مته و سوراخکاری",
-                href: "/products/drills",
+                href: "/products?scope=4&categories=4",
               },
               {
                 title: "قلاویز و رزوه‌زنی",
-                href: "/products/taps",
+                href: "/products?scope=5&categories=5",
               },
             ]}
           />
@@ -67,23 +67,23 @@ const Footer = () => {
             items={[
               {
                 title: "اینسرت تراشکاری کارباید",
-                href: "/products?product=carbide-turning-insert",
+                href: "/products/carbide-turning-insert",
               },
               {
                 title: "فرز انگشتی کارباید",
-                href: "/products?product=carbide-end-mill",
+                href: "/products/carbide-end-mill",
               },
               {
                 title: "مته صنعتی",
-                href: "/products?product=industrial-drill",
+                href: "/products/industrial-drill",
               },
               {
                 title: "هلدر تراشکاری",
-                href: "/products?product=turning-holder",
+                href: "/products/turning-holder",
               },
               {
                 title: "ابزارگیر CNC",
-                href: "/products?product=cnc-tool-holder",
+                href: "/products/cnc-tool-holder",
               },
             ]}
           />

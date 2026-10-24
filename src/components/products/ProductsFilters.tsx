@@ -6,18 +6,64 @@ import ProductsSort from "./ProductsSort";
 import ProductsCategoryFilter from "./ProductsCategoryFilter";
 import ProductsTypeFilter from "./ProductsTypeFilter";
 
+import {
+  findCategoryByKey,
+  findCategoryById,
+  getLeafCategoryIds,
+} from "./products.categories";
+
 const ProductsFilters = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const sort =
-    (searchParams.get("sort") as "newest" | "best-selling") || "newest";
+    searchParams.get("sort") === "best-selling" ? "best-selling" : "newest";
 
-  const selectedCategories =
-    searchParams.get("categories")?.split(",").filter(Boolean) ?? [];
+  const scopeKey = searchParams.get("scope");
+
+  const scopeCategory = scopeKey ? findCategoryByKey(scopeKey) : undefined;
+
+  const scopeCategoryId = scopeCategory?.id;
+
+  const scopeLeafIds = scopeCategory ? getLeafCategoryIds(scopeCategory) : [];
+
+  const parsedCategories = [
+    ...new Set(
+      (searchParams.get("categories") ?? "")
+        .split(",")
+        .filter(Boolean)
+        .map((value) => findCategoryByKey(value)?.id)
+        .filter((id): id is number => id !== undefined),
+    ),
+  ];
+
+  const isWithinScope = (categoryId: number) => {
+    if (!scopeCategory) return true;
+
+    const category = findCategoryById(categoryId);
+    if (!category) return false;
+
+    return getLeafCategoryIds(category).every((id) =>
+      scopeLeafIds.includes(id),
+    );
+  };
+
+  const selectedCategories = parsedCategories.filter(isWithinScope);
+
+  if (scopeCategoryId !== undefined && selectedCategories.length === 0) {
+    selectedCategories.push(scopeCategoryId);
+  }
 
   const bestSellerOnly = searchParams.get("bestSeller") === "1";
+
+  const replaceParams = (params: URLSearchParams) => {
+    const query = params.toString();
+
+    router.replace(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    });
+  };
 
   const updateUrl = (key: string, value?: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -28,56 +74,47 @@ const ProductsFilters = () => {
       params.delete(key);
     }
 
-    const query = params.toString();
-
-    router.replace(query ? `${pathname}?${query}` : pathname, {
-      scroll: false,
-    });
+    replaceParams(params);
   };
 
-  const handleCategoryToggle = (slug: string) => {
-    const nextCategories = selectedCategories.includes(slug)
-      ? selectedCategories.filter((item) => item !== slug)
-      : [...selectedCategories, slug];
+  const handleCategoryToggle = (id: number) => {
+    if (!isWithinScope(id)) return;
+
+    let nextCategories: number[];
+
+    if (selectedCategories.includes(id)) {
+      nextCategories = selectedCategories.filter((item) => item !== id);
+    } else {
+      const withoutScope = selectedCategories.filter(
+        (item) => item !== scopeCategoryId,
+      );
+
+      nextCategories = [...withoutScope, id];
+    }
+
+    if (scopeCategoryId !== undefined && nextCategories.length === 0) {
+      nextCategories = [scopeCategoryId];
+    }
 
     const params = new URLSearchParams(searchParams.toString());
 
-    // با انتخاب دسته‌بندی، فیلتر تک‌محصولی حذف می‌شود.
     params.delete("product");
 
-    if (nextCategories.length) {
-      params.set("categories", nextCategories.join(","));
+    if (nextCategories.length > 0) {
+      params.set("categories", [...new Set(nextCategories)].join(","));
     } else {
       params.delete("categories");
     }
 
-    const query = params.toString();
-
-    router.replace(query ? `${pathname}?${query}` : pathname, {
-      scroll: false,
-    });
+    replaceParams(params);
   };
 
-  const handleSortChange = (
-    value: "newest" | "best-selling",
-  ) => {
-    if (value === "newest") {
-      updateUrl("sort");
-      return;
-    }
-
-    updateUrl("sort", value);
+  const handleSortChange = (value: "newest" | "best-selling") => {
+    updateUrl("sort", value === "newest" ? undefined : value);
   };
 
-  const handleBestSellerChange = (
-    value: "all" | "best-seller",
-  ) => {
-    if (value === "all") {
-      updateUrl("bestSeller");
-      return;
-    }
-
-    updateUrl("bestSeller", "1");
+  const handleBestSellerChange = (value: "all" | "best-seller") => {
+    updateUrl("bestSeller", value === "all" ? undefined : "1");
   };
 
   return (
@@ -85,14 +122,12 @@ const ProductsFilters = () => {
       dir="rtl"
       className="border-border bg-background w-full overflow-hidden rounded-2xl border"
     >
-      <ProductsSort
-        sort={sort}
-        onChange={handleSortChange}
-      />
+      <ProductsSort sort={sort} onChange={handleSortChange} />
 
       <ProductsCategoryFilter
         selectedCategories={selectedCategories}
         onToggle={handleCategoryToggle}
+        scopeCategoryId={scopeCategoryId}
       />
 
       <ProductsTypeFilter

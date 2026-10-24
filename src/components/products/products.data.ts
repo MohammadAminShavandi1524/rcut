@@ -1,3 +1,5 @@
+import { staticProductLeafIds } from "./products.categories";
+
 export const PRODUCT_IMAGES = [
   "/products/1.png",
   "/products/2.png",
@@ -45,6 +47,7 @@ export type Product = {
   slug: string;
   image: string;
   category: ProductCategory;
+  categoryId: number;
   name: string;
   description: string;
   created: string;
@@ -226,12 +229,6 @@ const bestSellerIds = [
   2, 5, 7, 11, 14, 18, 21, 25, 29, 32, 36, 39, 43, 47, 51, 55, 58,
 ];
 
-/*
- * Slugهای محصولات منتخب فوتر
- *
- * برای محصولات دیگر اگر بعداً لینک مستقیم خواستیم،
- * slug پایدار آن‌ها به صورت product-{id} ساخته می‌شود.
- */
 const productSlugOverrides: Record<number, string> = {
   1: "carbide-turning-insert",
   11: "carbide-end-mill",
@@ -243,6 +240,7 @@ const productSlugOverrides: Record<number, string> = {
 export const products: Product[] = productCategories.flatMap(
   (category, categoryIndex) => {
     const data = categoryProducts[category.title];
+    const leafIds = staticProductLeafIds[category.title];
 
     return data.names.map((name, productIndex) => {
       const id = categoryIndex * 10 + productIndex + 1;
@@ -259,6 +257,8 @@ export const products: Product[] = productCategories.flatMap(
         image: PRODUCT_IMAGES[(id - 1) % PRODUCT_IMAGES.length],
 
         category: category.title,
+
+        categoryId: leafIds[productIndex % leafIds.length],
 
         name,
 
