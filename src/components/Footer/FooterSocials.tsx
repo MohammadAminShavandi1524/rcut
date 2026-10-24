@@ -27,7 +27,7 @@ const socials = [
 
 const FooterSocials = () => {
   return (
-    <div className="flex items-center gap-5">
+    <div className="flex items-center justify-center gap-4 sm:gap-5">
       {socials.map((item) =>
         item.href ? (
           <Link
