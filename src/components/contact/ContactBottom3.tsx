@@ -21,9 +21,9 @@ const socials = [
     href: "",
   },
   {
-    name: "Eitaa",
-    icon: "/socials/eita.webp",
-    href: "",
+    name: "Telegram",
+    icon: "/socials/Telegram_logo.webp",
+    href: "https://t.me/abzar_tarash_rassoli",
   },
 ];
 
