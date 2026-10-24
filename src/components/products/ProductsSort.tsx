@@ -28,11 +28,11 @@ const ProductsSort = ({ sort, onChange }: Props) => {
   }, []);
 
   return (
-    <div className="p-6">
-      <div className="flex items-center gap-2">
+    <div className="p-4 sm:p-5 3xl:p-6">
+      <div className="flex flex-wrap items-center gap-2 3xl:flex-nowrap">
         <span className="text-muted-foreground text-sm">مرتب‌سازی:</span>
 
-        <div ref={sortRef} className="relative min-w-[180px]">
+        <div ref={sortRef} className="relative w-full min-w-0 sm:w-auto sm:min-w-[180px] lg:w-full lg:min-w-0 2xl:w-auto 2xl:min-w-[180px]">
           <button
             type="button"
             onClick={() => setSortOpen((value) => !value)}

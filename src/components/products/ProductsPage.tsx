@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
-import { ChevronLeft } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ChevronDown, ChevronLeft, SlidersHorizontal } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -23,6 +23,7 @@ type Props = {
 };
 
 const ProductsPage = ({ categorySlug }: Props) => {
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const searchParams = useSearchParams();
 
   const sort = searchParams.get("sort") || "newest";
@@ -152,7 +153,7 @@ const ProductsPage = ({ categorySlug }: Props) => {
 
   return (
     <main dir="rtl" className="bg-background min-h-screen">
-      <section className="w90 mx-auto py-8 lg:px-10">
+      <section className="w90 mx-auto py-6 sm:py-8 lg:px-6 xl:px-8 3xl:px-10">
         {/* Breadcrumb */}
         <nav
           aria-label="مسیر صفحه"
@@ -217,17 +218,46 @@ const ProductsPage = ({ categorySlug }: Props) => {
           )}
         </nav>
 
+        {/* Mobile / Tablet Filter Toggle */}
+        <div className="mt-6 lg:hidden">
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((value) => !value)}
+            aria-expanded={filtersOpen}
+            aria-controls="products-filters-panel"
+            className="border-border bg-background text-foreground hover:border-custom-primary flex min-h-12 w-full cursor-pointer items-center justify-between rounded-xl border px-4 py-3 text-sm font-semibold transition-colors duration-300"
+          >
+            <span className="flex items-center gap-2.5">
+              <SlidersHorizontal
+                size={19}
+                strokeWidth={1.7}
+                className="text-custom-primary"
+              />
+              فیلتر و مرتب‌سازی محصولات
+            </span>
+
+            <ChevronDown
+              size={19}
+              strokeWidth={1.7}
+              className={`text-muted-foreground transition-transform duration-300 ${
+                filtersOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+        </div>
+
         {/* Main */}
-        <div className="mt-8 grid items-start gap-5 lg:grid-cols-[300px_minmax(0,1fr)]">
+        <div className="mt-4 grid min-w-0 items-start gap-4 lg:mt-8 lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-5 xl:grid-cols-[270px_minmax(0,1fr)] 3xl:grid-cols-[300px_minmax(0,1fr)]">
           {/* Sidebar */}
-          <div className="lg:sticky lg:top-28">
+          <div id="products-filters-panel"
+            className={`${filtersOpen ? "block" : "hidden"} min-w-0 lg:sticky lg:top-28 lg:block`}>
             <ProductsFilters />
           </div>
 
           {/* Products */}
           <div>
             {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+              <div className="grid min-w-0 grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 mlg:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 3xl:gap-x-5">
                 {filteredProducts.map((product) => (
                   <ProductCard
                     key={product.id}

@@ -48,26 +48,45 @@ const ScrollToTop = () => {
     <button
       type="button"
       onClick={handleScrollToTop}
-      aria-label="Scroll to top"
+      aria-label="بازگشت به بالای صفحه"
+      aria-hidden={!showButton}
+      tabIndex={showButton ? 0 : -1}
       className={cn(
         "border-border-secondary bg-background text-foreground",
 
-        "fixed end-6 bottom-6 z-40",
+        // Position
+        "fixed z-40",
+        "end-4 bottom-4",
+        "sm:end-5 sm:bottom-5",
+        "lg:end-6 lg:bottom-6",
 
-        "flex size-12 cursor-pointer items-center justify-center rounded-xl border",
+        // Size
+        "flex size-10 cursor-pointer items-center justify-center",
+        "sm:size-11",
+        "lg:size-12",
 
-        "shadow-[0_8px_30px_rgba(0,0,0,0.08)]",
+        // Appearance
+        "rounded-lg border",
+        "sm:rounded-xl",
+        "shadow-[0_6px_20px_rgba(0,0,0,0.07)]",
+        "lg:shadow-[0_8px_30px_rgba(0,0,0,0.08)]",
 
+        // Transitions
         "transition-[opacity,transform,background-color,border-color,color] duration-500 ease-out",
 
+        // Hover
         "hover:border-custom-primary hover:bg-custom-primary hover:text-white",
 
+        // Visibility
         showButton
           ? "translate-y-0 opacity-100"
           : "pointer-events-none translate-y-6 opacity-0",
       )}
     >
-      <ArrowUp className="size-4.5" strokeWidth={1.8} />
+      <ArrowUp
+        className="size-4 sm:size-[17px] lg:size-4.5"
+        strokeWidth={1.8}
+      />
     </button>
   );
 };

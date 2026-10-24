@@ -60,7 +60,7 @@ const ProductDetails = ({ product }: Props) => {
 
   return (
     <main dir="rtl" className="bg-background">
-      <section className="w90 mx-auto py-8 lg:px-10 lg:pb-20">
+      <section className="w90 mx-auto py-6 sm:py-8 lg:px-6 lg:pb-14 xl:px-8 3xl:px-10 3xl:pb-20">
         {/* Breadcrumb */}
         <nav
           aria-label="مسیر صفحه"
@@ -121,10 +121,10 @@ const ProductDetails = ({ product }: Props) => {
         </nav>
 
         {/* Product */}
-        <article className="border-border mt-8 overflow-hidden rounded-3xl border">
+        <article className="border-border mt-6 overflow-hidden rounded-2xl border sm:mt-8 3xl:rounded-3xl">
           <div className="grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
             {/* Information — Right */}
-            <div className="order-2 flex min-w-0 flex-col justify-center p-6 sm:p-10 lg:order-1 lg:p-12">
+            <div className="order-2 flex min-w-0 flex-col justify-center p-5 sm:p-8 lg:order-1 lg:p-7 xl:p-9 2xl:p-10 3xl:p-12">
               {(product.isBestSeller || product.isNew) && (
                 <div className="mb-5 flex flex-wrap items-center gap-2">
                   {product.isBestSeller && (
@@ -141,13 +141,13 @@ const ProductDetails = ({ product }: Props) => {
                 </div>
               )}
 
-              <h1 className="text-foreground text-2xl leading-relaxed font-bold sm:text-3xl sm:leading-relaxed">
+              <h1 className="text-foreground text-xl leading-relaxed font-bold sm:text-2xl sm:leading-relaxed xl:text-[28px] 3xl:text-3xl">
                 {product.name}
               </h1>
 
               <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
                 <span className="text-muted-foreground">
-                  دستهبندی:
+                  دسته‌بندی:
                 </span>
 
                 <Link
@@ -180,13 +180,13 @@ const ProductDetails = ({ product }: Props) => {
 
             {/* Image — Left */}
             <div className="border-border bg-secondary-bg/40 order-1 flex min-w-0 items-center justify-center border-b p-3 lg:order-2 lg:border-s lg:border-b-0">
-              <div className="relative aspect-square w-full max-w-[400px]">
+              <div className="relative aspect-square w-full max-w-[300px] sm:max-w-[340px] xl:max-w-[360px] 2xl:max-w-[380px] 3xl:max-w-[400px]">
                 <Image
                   src={product.image}
                   alt={product.name}
                   fill
                   priority
-                  sizes="(max-width: 480px) 85vw, 400px"
+                  sizes="(max-width: 480px) 85vw, (max-width: 1024px) 340px, (max-width: 1280px) 300px, (max-width: 1696px) 380px, 400px"
                   className="object-contain"
                 />
               </div>

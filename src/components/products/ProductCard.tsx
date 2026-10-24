@@ -12,7 +12,7 @@ const ProductCard = ({ product, showCategory = true }: Props) => {
   return (
     <article
       dir="rtl"
-      className="group border-border bg-background hover:border-custom-primary flex h-full min-h-[500px] flex-col overflow-hidden rounded-2xl border transition-colors duration-300"
+      className="group border-border bg-background hover:border-custom-primary flex h-full min-h-[390px] sm:min-h-[430px] lg:min-h-[410px] xl:min-h-[450px] 3xl:min-h-[500px] flex-col overflow-hidden rounded-2xl border transition-colors duration-300"
     >
       {/* Image */}
       <div className="relative aspect-square shrink-0 overflow-hidden">
@@ -26,7 +26,7 @@ const ProductCard = ({ product, showCategory = true }: Props) => {
             alt={product.name}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-            className="object-contain p-6 transition-transform duration-500 group-hover:scale-[1.03]"
+            className="object-contain p-4 transition-transform duration-500 group-hover:scale-[1.03] sm:p-5 3xl:p-6"
           />
 
           {/* Tags */}
@@ -49,7 +49,7 @@ const ProductCard = ({ product, showCategory = true }: Props) => {
       <div className="bg-border h-px shrink-0" />
 
       {/* Content */}
-      <div className="grid flex-1 grid-rows-[1fr_auto] gap-5 p-4">
+      <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 p-3.5 sm:p-4 3xl:gap-5">
         {/* Product Info */}
         <Link href={`/products/${product.slug}`} className="block min-h-0">
           {/* {showCategory && (
@@ -59,14 +59,14 @@ const ProductCard = ({ product, showCategory = true }: Props) => {
           )} */}
 
           <h3
-            className={`text-foreground text-base font-bold ${
+            className={`text-foreground text-sm font-bold sm:text-base ${
               showCategory ? "mt-2" : ""
             }`}
           >
             {product.name}
           </h3>
 
-          <p className="text-muted-foreground mt-3 pe-2 text-justify text-sm leading-7">
+          <p className="text-muted-foreground mt-2 pe-1 text-justify text-[13px] leading-6 sm:mt-3 sm:pe-2 sm:text-sm sm:leading-7">
             {product.description}
           </p>
         </Link>

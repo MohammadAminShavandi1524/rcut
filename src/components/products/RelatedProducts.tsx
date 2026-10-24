@@ -53,12 +53,12 @@ const RelatedProducts = ({ products }: Props) => {
       dir="rtl"
       aria-labelledby="related-products-title"
       aria-roledescription={hasOverflow ? "کروسل" : undefined}
-      className="mt-24 lg:mt-30"
+      className="mt-14 sm:mt-18 lg:mt-20 3xl:mt-30"
     >
       <div className="mb-8">
         <h2
           id="related-products-title"
-          className="text-foreground text-2xl font-bold sm:text-3xl"
+          className="text-foreground text-xl font-bold sm:text-2xl 3xl:text-3xl"
         >
           محصولات مشابه
         </h2>
@@ -73,7 +73,7 @@ const RelatedProducts = ({ products }: Props) => {
           {products.map((product) => (
             <div
               key={product.id}
-              className="flex min-w-0 shrink-0 grow-0 basis-full items-stretch ps-5 sm:basis-1/2 md:basis-1/3 xl:basis-1/4 2xl:basis-1/5 [&>article]:h-auto [&>article]:w-full"
+              className="flex min-w-0 shrink-0 grow-0 basis-full items-stretch ps-5 sm:basis-1/2 md:basis-1/3 xl:basis-1/3 2xl:basis-1/4 3xl:basis-1/5 [&>article]:h-auto [&>article]:w-full"
             >
               <ProductCard product={product} showCategory={false} />
             </div>

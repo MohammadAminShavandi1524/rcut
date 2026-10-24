@@ -6,7 +6,7 @@ import ProductsDropdown from "./ProductsDropdown";
 const Nav = () => {
   return (
     <nav aria-label="منوی اصلی">
-      <ul className="3xl:gap-x-8 flex items-center gap-x-2 whitespace-nowrap xl:gap-x-3.5 2xl:gap-x-5">
+      <ul className="3xl:gap-x-8 flex items-center gap-x-3 whitespace-nowrap xl:gap-x-5 2xl:gap-x-6.5">
         <NavItem label="خانه" href="/" />
 
         <ProductsDropdown />
