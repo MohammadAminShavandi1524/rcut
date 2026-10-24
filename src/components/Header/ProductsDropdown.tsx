@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -145,18 +144,12 @@ function CategoryMenu({
       window.innerHeight - submenuRect.height - 8,
     );
 
-    const targetTop = Math.min(
-      Math.max(anchorRect.top, minTop),
-      maxTop,
-    );
+    const targetTop = Math.min(Math.max(anchorRect.top, minTop), maxTop);
 
     setSubmenuTop(targetTop - anchorRect.top);
   }, [openItem, isVisible]);
 
-  const handleItemEnter = (
-    category: CategoryItem,
-    element: HTMLDivElement,
-  ) => {
+  const handleItemEnter = (category: CategoryItem, element: HTMLDivElement) => {
     if (!category.children?.length) {
       setOpenItem(null);
       setSubmenuTop(0);
@@ -170,9 +163,7 @@ function CategoryMenu({
     const submenuWidth = 226;
 
     setSubmenuSide(
-      leftSpace >= submenuWidth || leftSpace >= rightSpace
-        ? "left"
-        : "right",
+      leftSpace >= submenuWidth || leftSpace >= rightSpace ? "left" : "right",
     );
 
     activeItemRef.current = element;
@@ -298,7 +289,7 @@ const ProductsDropdown = () => {
       <Link
         href="/products"
         className={cn(
-          "flex items-center gap-1.5 py-2.5 text-[17px] font-medium transition-colors",
+          "3xl:text-[17px] flex items-center gap-1.5 py-2.5 text-[13px] font-medium transition-colors xl:text-[14px] 2xl:text-[15px]",
           "text-foreground/80 hover:text-custom-primary",
           isActive && "text-custom-primary",
         )}
@@ -316,10 +307,7 @@ const ProductsDropdown = () => {
         )}
       >
         <div className="bg-background border-border w-[210px] rounded-lg border p-2 shadow-[0_10px_30px_rgba(0,0,0,0.09)]">
-          <CategoryMenu
-            items={categories}
-            fallbackHref="/products"
-          />
+          <CategoryMenu items={categories} fallbackHref="/products" />
         </div>
       </div>
     </li>

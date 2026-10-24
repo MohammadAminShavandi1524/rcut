@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import Logo from "./Logo";
 import Nav from "./Nav";
 import SearchBar from "./SearchBar";
+import MobileHeader from "./MobileHeader";
 
 const Header = () => {
   const lastScrollY = useRef(0);
@@ -17,6 +18,8 @@ const Header = () => {
   useEffect(() => {
     const SCROLL_THRESHOLD = 80;
     const SCROLL_DELTA = 10;
+
+    lastScrollY.current = window.scrollY;
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -33,7 +36,6 @@ const Header = () => {
       if (Math.abs(difference) < SCROLL_DELTA) return;
 
       setShowHeader(difference < 0);
-
       lastScrollY.current = currentScrollY;
     };
 
@@ -57,18 +59,26 @@ const Header = () => {
           : "border-border",
       )}
     >
-      <div className="w90 max-lg:hidden">
-        <div className="flex h-[100px] items-center justify-between gap-x-10">
-          <div className="shrink-0">
-            <Logo />
-          </div>
+      {/* Mobile / Tablet */}
+      <div className="lg:hidden">
+        <MobileHeader />
+      </div>
 
-          <div className="flex flex-1 justify-center">
-            <Nav />
-          </div>
+      {/* Desktop */}
+      <div className="hidden lg:block">
+        <div className="w90">
+          <div className="3xl:h-[100px] 3xl:gap-x-10 flex h-[72px] items-center justify-between gap-x-3 xl:h-[80px] xl:gap-x-5 2xl:h-[90px] 2xl:gap-x-7">
+            <div className="shrink-0">
+              <Logo variant="desktop" />
+            </div>
 
-          <div className="shrink-0">
-            <SearchBar />
+            <div className="flex min-w-0 flex-1 justify-center">
+              <Nav />
+            </div>
+
+            <div className="shrink-0">
+              <SearchBar />
+            </div>
           </div>
         </div>
       </div>

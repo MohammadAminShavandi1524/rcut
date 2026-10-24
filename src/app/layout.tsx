@@ -7,18 +7,23 @@ import AppToaster from "@/components/AppToaster";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import MobileMenu from "@/components/Header/MobileMenu";
 
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 
 import { CustomToastProvider } from "@/components/ui/custom-toast";
-
+import {
+  MobileSidebar,
+  MobileSidebarContent,
+} from "@/components/ui/mobile-sidebar";
 
 export const metadata: Metadata = {
   title: {
-    default: "RCUT",
-    template: "%s | RCUT",
+    default: "آرکات",
+    template: "%s | آرکات",
   },
-  description: "RCUT",
+  description:
+    "آرکات؛ مرجع تأمین ابزارهای تخصصی تراشکاری، قالب‌سازی و CNC. عرضه ابزارهای صنعتی باکیفیت از برندهای معتبر، همراه با مشاوره تخصصی برای صنعتگران، تولیدکنندگان و کارگاه‌های ماشین‌کاری.",
 };
 
 export default function RootLayout({
@@ -29,12 +34,12 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl">
       <body className="font-IRANYekanX">
-        {/* <MobileSidebar> */}
+        <MobileSidebar>
           <AppToaster />
 
-          {/* <MobileSidebarContent width="min(88vw, 380px)">
+          <MobileSidebarContent width="min(88vw, 380px)">
             <MobileMenu />
-          </MobileSidebarContent> */}
+          </MobileSidebarContent>
 
           <div className="bg-background text-foreground relative min-h-screen">
             <Header />
@@ -49,7 +54,7 @@ export default function RootLayout({
 
             <ScrollToTop />
           </div>
-        {/* </MobileSidebar> */}
+        </MobileSidebar>
       </body>
     </html>
   );

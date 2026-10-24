@@ -21,7 +21,7 @@ const NavItem = ({ label, href }: NavItemProps) => {
       <Link
         href={href}
         className={cn(
-          "relative block py-2.5 text-[17px] font-medium whitespace-nowrap transition-colors duration-300",
+          "3xl:text-[17px] relative block py-2.5 text-[13px] font-medium whitespace-nowrap transition-colors duration-300 xl:text-[14px] 2xl:text-[15px]",
           "text-foreground/75 hover:text-custom-primary",
           "after:bg-custom-primary after:absolute after:right-0 after:-bottom-[1px] after:h-[2px] after:w-0 after:transition-all after:duration-300",
           "hover:after:w-full",
