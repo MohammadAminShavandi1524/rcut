@@ -15,7 +15,15 @@ const useAboutIntro2Animation = () => {
 
     if (!section) return;
 
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (reduceMotion) return;
+
     const ctx = gsap.context(() => {
+      const isMobile = window.matchMedia("(max-width: 1023px)").matches;
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
@@ -25,12 +33,12 @@ const useAboutIntro2Animation = () => {
       });
 
       tl.from(".about-brand-title", {
-        x: 35,
+        x: isMobile ? 0 : 35,
+        y: isMobile ? 18 : 0,
         opacity: 0,
         duration: 0.5,
         ease: "power2.out",
       })
-
         .from(
           ".about-brand-line",
           {
@@ -41,7 +49,6 @@ const useAboutIntro2Animation = () => {
           },
           "-=0.25",
         )
-
         .from(
           ".about-brand-description",
           {
@@ -52,7 +59,6 @@ const useAboutIntro2Animation = () => {
           },
           "-=0.15",
         )
-
         .from(
           ".about-content p",
           {
@@ -66,7 +72,9 @@ const useAboutIntro2Animation = () => {
         );
     }, section);
 
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+    };
   }, []);
 
   return sectionRef;

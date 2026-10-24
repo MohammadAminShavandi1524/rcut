@@ -1,4 +1,4 @@
-import AboutIntro from "@/components/home/AboutIntro/AboutIntro";
+
 import AboutIntro2 from "@/components/home/AboutIntro2/AboutIntro2";
 import FeaturedProducts from "@/components/home/FeaturedProducts/FeaturedProducts";
 import HeroCarousel from "@/components/home/Hero/HeroCarousel";
@@ -9,7 +9,6 @@ const page = () => {
   return (
     <>
       <HeroCarousel />
-      {/* <AboutIntro /> */}
       <FeaturedProducts />
       <AboutIntro2 />
       <NewProducts />

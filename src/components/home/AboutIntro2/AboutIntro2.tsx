@@ -6,30 +6,33 @@ const AboutIntro2 = () => {
   const sectionRef = useAboutIntro2Animation();
 
   return (
-    <section ref={sectionRef} className="py-28">
+    <section
+      ref={sectionRef}
+      className="py-14 sm:py-18 md:py-20 lg:py-24 xl:py-28"
+    >
       <div className="w90" dir="rtl">
-        <div className="grid items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="grid items-center gap-8 sm:gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:gap-10 xl:gap-14">
           {/* Brand Statement */}
-          <div className="text-right">
-            <h2 className="about-brand-title text-6xl leading-[1.25] font-bold xl:text-7xl">
-              <span className="block text-foreground">دقت و کیفیت</span>
+          <div className="min-w-0 text-right">
+            <h2 className="about-brand-title text-foreground xss:text-[40px] text-[36px] leading-[1.35] font-bold sm:text-5xl md:text-[54px] lg:text-6xl lg:leading-[1.25] xl:text-7xl">
+              <span className="block">دقت و کیفیت</span>
 
-              <span className="mt-3 block text-custom-primary">
+              <span className="text-custom-primary mt-2 block sm:mt-3">
                 در هر انتخاب
               </span>
             </h2>
 
-            <div className="about-brand-line bg-custom-primary mt-8 h-[3px] w-40" />
+            <div className="about-brand-line bg-custom-primary mt-6 h-[3px] w-24 origin-right sm:mt-7 sm:w-32 lg:mt-8 lg:w-40" />
 
-            <p className="about-brand-description mt-6 max-w-sm text-lg leading-9 text-muted-foreground">
+            <p className="about-brand-description text-muted-foreground mt-5 max-w-sm text-[14px] leading-7 sm:mt-6 sm:text-base sm:leading-8 lg:text-lg lg:leading-9">
               همراه صنعتگران برای تامین ابزارهای دقیق و راهکارهای حرفه‌ای
               ماشین‌کاری
             </p>
           </div>
 
           {/* Content */}
-          <div className="about-content text-right">
-            <div className="space-y-7 text-lg leading-10 text-muted-foreground">
+          <div className="about-content min-w-0 text-right">
+            <div className="text-muted-foreground space-y-4 text-[14px] leading-8 sm:space-y-5 sm:text-[15px] sm:leading-9 lg:space-y-7 lg:text-lg lg:leading-10">
               <p>
                 آرکات با هدف تامین ابزارهای تخصصی تراشکاری، قالب‌سازی و CNC
                 فعالیت خود را آغاز کرده است. ما تلاش می‌کنیم با ارائه محصولات

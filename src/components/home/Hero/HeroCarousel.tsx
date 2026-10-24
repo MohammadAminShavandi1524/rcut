@@ -41,7 +41,6 @@ const HeroCarousel = () => {
     if (!emblaApi) return;
 
     emblaApi.scrollNext();
-
     startAutoplay();
   }, [emblaApi, startAutoplay]);
 
@@ -49,7 +48,6 @@ const HeroCarousel = () => {
     if (!emblaApi) return;
 
     emblaApi.scrollPrev();
-
     startAutoplay();
   }, [emblaApi, startAutoplay]);
 
@@ -67,20 +65,29 @@ const HeroCarousel = () => {
     <section
       className="relative overflow-hidden"
       dir="rtl"
+      aria-label="اسلایدر معرفی محصولات"
       onMouseEnter={stopAutoplay}
       onMouseLeave={startAutoplay}
+      onFocusCapture={stopAutoplay}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          startAutoplay();
+        }
+      }}
     >
+      {/* Carousel */}
       <div ref={emblaRef} className="overflow-hidden">
         <div className="flex">
-          {heroSlides.map((slide) => (
+          {heroSlides.map((slide, index) => (
             <div key={slide.id} className="min-w-0 shrink-0 grow-0 basis-full">
-              <HeroSlide slide={slide} />
+              <HeroSlide slide={slide} priority={index === 0} />
             </div>
           ))}
         </div>
       </div>
 
-      <div className="absolute bottom-8 right-8 z-20">
+      {/* Navigation Controls */}
+      <div className="absolute right-7 bottom-5 z-20 sm:right-[5%] sm:bottom-6 lg:right-8 lg:bottom-8">
         <HeroControls onPrev={prev} onNext={next} />
       </div>
     </section>
