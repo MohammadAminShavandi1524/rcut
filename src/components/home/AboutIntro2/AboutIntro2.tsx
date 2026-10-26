@@ -33,20 +33,20 @@ const AboutIntro2 = () => {
           {/* Content */}
           <div className="about-content min-w-0 text-right">
             <div className="text-muted-foreground space-y-4 text-[14px] leading-8 sm:space-y-5 sm:text-[15px] sm:leading-9 lg:space-y-7 lg:text-lg lg:leading-10">
-              <p>
+              <p className="text-justify">
                 آرکات با هدف تامین ابزارهای تخصصی تراشکاری، قالب‌سازی و CNC
                 فعالیت خود را آغاز کرده است. ما تلاش می‌کنیم با ارائه محصولات
                 باکیفیت از برندهای معتبر، تجربه‌ای مطمئن و حرفه‌ای برای
                 صنعتگران، تولیدکنندگان و کارگاه‌های ماشین‌کاری فراهم کنیم.
               </p>
 
-              <p>
+              <p className="text-justify">
                 با تکیه بر تجربه، شناخت فنی و توجه به نیاز مشتریان، همواره در
                 تلاش هستیم تا علاوه بر عرضه محصولات، در انتخاب ابزار مناسب نیز
                 همراه شما باشیم.
               </p>
 
-              <p>
+              <p className="text-justify">
                 هدف ما تنها فروش ابزار نیست، بلکه ایجاد یک مرجع قابل اعتماد برای
                 تامین ابزارهای صنعتی و ارائه اطلاعات تخصصی در این حوزه است.
               </p>
