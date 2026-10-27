@@ -39,9 +39,7 @@ export async function GET(_req: Request, { params }: RouteContext) {
     const res = await fetch(
       `${apiUrl.replace(/\/$/, "")}/shop/product/get_by_category/${categoryId}`,
       {
-        next: {
-          revalidate: 600,
-        },
+        cache: "no-store",
       },
     );
 

@@ -10,9 +10,26 @@ import { LoaderCircle, PackageSearch, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getLenisInstance } from "@/lib/lenis-instance";
 
-import { products, type Product } from "@/components/products/products.data";
-
-import { getCategoryPath } from "@/components/products/products.categories";
+type Product = {
+  id: number;
+  name: string;
+  description: string;
+  image: string;
+  category: {
+    id: number;
+    name: string;
+    index: number;
+    child_count: number;
+    parent: {
+      id: number;
+      name: string;
+    } | null;
+    created: string;
+  };
+  new: boolean;
+  top_seller: boolean;
+  created: string;
+};
 
 type Props = {
   fullWidth?: boolean;
@@ -20,73 +37,6 @@ type Props = {
 
 const MAX_RESULTS = 20;
 const SEARCH_DEBOUNCE = 400;
-
-const normalizeText = (value: string) =>
-  value
-    .trim()
-    .toLocaleLowerCase("fa")
-    .replace(/ي/g, "ی")
-    .replace(/ك/g, "ک")
-    .replace(/\u200c/g, " ")
-    .replace(/\s+/g, " ");
-
-const searchStaticProducts = (query: string): Product[] => {
-  const normalizedQuery = normalizeText(query);
-
-  if (!normalizedQuery) return [];
-
-  const queryWords = normalizedQuery.split(" ");
-
-  return products
-    .map((product) => {
-      const categoryPath = getCategoryPath(product.categoryId);
-
-      const categoryNames = categoryPath
-        .map((category) => category.name)
-        .join(" ");
-
-      const normalizedName = normalizeText(product.name);
-
-      const searchableText = normalizeText(
-        [
-          product.name,
-          product.description,
-          product.category,
-          categoryNames,
-        ].join(" "),
-      );
-
-      if (!queryWords.every((word) => searchableText.includes(word))) {
-        return null;
-      }
-
-      const score = normalizedName.includes(normalizedQuery)
-        ? normalizedName.startsWith(normalizedQuery)
-          ? 3
-          : 2
-        : 1;
-
-      return { product, score };
-    })
-    .filter(
-      (
-        item,
-      ): item is {
-        product: Product;
-        score: number;
-      } => item !== null,
-    )
-    .sort((a, b) => {
-      if (a.score !== b.score) return b.score - a.score;
-
-      return (
-        new Date(b.product.created).getTime() -
-        new Date(a.product.created).getTime()
-      );
-    })
-    .slice(0, MAX_RESULTS)
-    .map((item) => item.product);
-};
 
 const SearchBar = ({ fullWidth = false }: Props) => {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -118,17 +68,59 @@ const SearchBar = ({ fullWidth = false }: Props) => {
       return;
     }
 
+    const controller = new AbortController();
+
+    setResults([]);
     setIsLoading(true);
     setHasSearched(false);
+    setIsOpen(true);
 
-    const timeout = window.setTimeout(() => {
-      setResults(searchStaticProducts(normalizedQuery));
-      setIsLoading(false);
-      setHasSearched(true);
-      setIsOpen(true);
+    const timeout = window.setTimeout(async () => {
+      try {
+        const response = await fetch("/api/products/search", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query: normalizedQuery,
+          }),
+          cache: "no-store",
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("جست‌وجوی محصولات ناموفق بود.");
+        }
+
+        const data: unknown = await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error("ساختار پاسخ جست‌وجو نامعتبر است.");
+        }
+
+        if (controller.signal.aborted) return;
+
+        setResults((data as Product[]).slice(0, MAX_RESULTS));
+        setHasSearched(true);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+
+        console.error("SEARCH PRODUCTS ERROR:", error);
+
+        setResults([]);
+        setHasSearched(true);
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
     }, SEARCH_DEBOUNCE);
 
-    return () => window.clearTimeout(timeout);
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
   }, [query]);
 
   /*
@@ -342,15 +334,12 @@ const SearchBar = ({ fullWidth = false }: Props) => {
               )}
             >
               {results.map((product) => {
-                const categoryPath = getCategoryPath(product.categoryId);
-
-                const categoryName =
-                  categoryPath.at(-1)?.name ?? product.category;
+                const categoryName = product.category.name;
 
                 return (
                   <Link
                     key={product.id}
-                    href={`/products/${product.slug}`}
+                    href={`/products/${product.id}`}
                     onClick={handleResultClick}
                     role="option"
                     aria-selected={false}

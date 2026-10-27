@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
 async function searchProducts(body: unknown) {
-  if (!API_URL) {
-    return NextResponse.json(
-      { detail: "API URL is not configured" },
-      { status: 500 },
-    );
-  }
-
-  const res = await fetch(`${API_URL.replace(/\/$/, "")}/shop/search`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/shop/search`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

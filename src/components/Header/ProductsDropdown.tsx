@@ -6,15 +6,55 @@ import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
-import {
-  categoryTree,
-  type CategoryNode,
-} from "@/components/products/products.categories";
+import type { CategoryNode } from "@/components/products/products.categories";
+
+interface ApiCategory {
+  id: number;
+  name: string;
+  index: number;
+  child_count: number;
+  parent: {
+    id: number;
+    name: string;
+  } | null;
+  created: string;
+}
 
 type CategoryMenuProps = {
   items: CategoryNode[];
   isVisible?: boolean;
 };
+
+function buildCategoryTree(categories: ApiCategory[]): CategoryNode[] {
+  const nodes = new Map<number, CategoryNode>();
+
+  const sortedCategories = [...categories].sort((a, b) => a.index - b.index);
+
+  for (const category of sortedCategories) {
+    nodes.set(category.id, {
+      id: category.id,
+      name: category.name,
+      slug: category.name === "برند یاماسا" ? "yamasa" : undefined,
+      children: [],
+    });
+  }
+
+  const roots: CategoryNode[] = [];
+
+  for (const category of sortedCategories) {
+    const node = nodes.get(category.id)!;
+
+    const parent = category.parent ? nodes.get(category.parent.id) : undefined;
+
+    if (parent) {
+      parent.children!.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+
+  return roots;
+}
 
 function getCategoryHref(category: CategoryNode) {
   if (category.slug === "yamasa") {
@@ -188,6 +228,56 @@ const ProductsDropdown = () => {
   const pathname = usePathname();
   const isActive = pathname.startsWith("/products");
 
+  const [categories, setCategories] = useState<CategoryNode[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("/api/categories", {
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("دریافت دسته بندی‌ها ناموفق بود.");
+        }
+
+        const data: ApiCategory[] = await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error("ساختار اطلاعات دسته بندی‌ها نامعتبر است.");
+        }
+
+        if (active) {
+          setCategories(buildCategoryTree(data));
+          setLoadError(false);
+        }
+      } catch (error) {
+        console.error("GET CATEGORIES ERROR:", error);
+
+        if (active) {
+          setLoadError(true);
+          setCategories([]);
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void fetchCategories();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const categoriesReady = !loading && !loadError && categories.length > 0;
+
   return (
     <li className="group relative shrink-0">
       <Link
@@ -202,18 +292,20 @@ const ProductsDropdown = () => {
         <ChevronDown className="size-4.5 transition-transform duration-300 group-hover:rotate-180" />
       </Link>
 
-      <div
-        className={cn(
-          "invisible absolute top-full -right-5 z-50 pt-2",
-          "translate-y-2 opacity-0 transition-all duration-300",
-          "group-hover:visible group-hover:translate-y-0 group-hover:opacity-100",
-          "group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100",
-        )}
-      >
-        <div className="bg-background border-border w-[210px] rounded-lg border p-2 shadow-[0_10px_30px_rgba(0,0,0,0.09)]">
-          <CategoryMenu items={categoryTree} />
+      {categoriesReady && (
+        <div
+          className={cn(
+            "invisible absolute top-full -right-5 z-50 pt-2",
+            "translate-y-2 opacity-0 transition-all duration-300",
+            "group-hover:visible group-hover:translate-y-0 group-hover:opacity-100",
+            "group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100",
+          )}
+        >
+          <div className="bg-background border-border w-[210px] rounded-lg border p-2 shadow-[0_10px_30px_rgba(0,0,0,0.09)]">
+            <CategoryMenu items={categories} />
+          </div>
         </div>
-      </div>
+      )}
     </li>
   );
 };
