@@ -1,7 +1,11 @@
 import { notFound } from "next/navigation";
 
 import ProductDetails from "@/components/products/ProductDetails";
-import { products } from "@/components/products/products.data";
+
+import type {
+  ApiProduct,
+  ApiCategory,
+} from "@/components/products/products.api";
 
 type Props = {
   params: Promise<{
@@ -9,22 +13,49 @@ type Props = {
   }>;
 };
 
-export function generateStaticParams() {
-  return products.map((product) => ({
-    product: product.slug,
-  }));
-}
-
 const Page = async ({ params }: Props) => {
-  const { product: productSlug } = await params;
+  const { product: productIdParam } = await params;
 
-  const product = products.find((item) => item.slug === productSlug);
+  const productId = Number(productIdParam);
 
-  if (!product) {
+  if (!Number.isSafeInteger(productId) || productId <= 0) {
     notFound();
   }
 
-  return <ProductDetails product={product} />;
+  const [productResponse, productsResponse, categoriesResponse] =
+    await Promise.all([
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/shop/product/${productId}`, {
+        cache: "no-store",
+      }),
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/shop/product`, {
+        cache: "no-store",
+      }),
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/shop/category`, {
+        cache: "no-store",
+      }),
+    ]);
+
+  if (productResponse.status === 404) {
+    notFound();
+  }
+
+  if (!productResponse.ok || !productsResponse.ok || !categoriesResponse.ok) {
+    throw new Error("دریافت اطلاعات محصول ناموفق بود.");
+  }
+
+  const [product, products, categories] = (await Promise.all([
+    productResponse.json(),
+    productsResponse.json(),
+    categoriesResponse.json(),
+  ])) as [ApiProduct, ApiProduct[], ApiCategory[]];
+
+  return (
+    <ProductDetails
+      product={product}
+      products={products}
+      categories={categories}
+    />
+  );
 };
 
 export default Page;

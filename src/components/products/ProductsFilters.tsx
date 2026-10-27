@@ -6,13 +6,19 @@ import ProductsSort from "./ProductsSort";
 import ProductsCategoryFilter from "./ProductsCategoryFilter";
 import ProductsTypeFilter from "./ProductsTypeFilter";
 
-import {
-  findCategoryByKey,
-  findCategoryById,
-  getLeafCategoryIds,
-} from "./products.categories";
+import type { CategoryNode } from "./products.categories";
 
-const ProductsFilters = () => {
+import {
+  findLiveCategoryByKey,
+  findLiveCategoryById,
+  getLiveLeafIds,
+} from "./products-category-tree";
+
+type Props = {
+  categories: CategoryNode[];
+};
+
+const ProductsFilters = ({ categories }: Props) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -22,18 +28,20 @@ const ProductsFilters = () => {
 
   const scopeKey = searchParams.get("scope");
 
-  const scopeCategory = scopeKey ? findCategoryByKey(scopeKey) : undefined;
+  const scopeCategory = scopeKey
+    ? findLiveCategoryByKey(scopeKey, categories)
+    : undefined;
 
   const scopeCategoryId = scopeCategory?.id;
 
-  const scopeLeafIds = scopeCategory ? getLeafCategoryIds(scopeCategory) : [];
+  const scopeLeafIds = scopeCategory ? getLiveLeafIds(scopeCategory) : [];
 
   const parsedCategories = [
     ...new Set(
       (searchParams.get("categories") ?? "")
         .split(",")
         .filter(Boolean)
-        .map((value) => findCategoryByKey(value)?.id)
+        .map((value) => findLiveCategoryByKey(value, categories)?.id)
         .filter((id): id is number => id !== undefined),
     ),
   ];
@@ -41,12 +49,11 @@ const ProductsFilters = () => {
   const isWithinScope = (categoryId: number) => {
     if (!scopeCategory) return true;
 
-    const category = findCategoryById(categoryId);
+    const category = findLiveCategoryById(categoryId, categories);
+
     if (!category) return false;
 
-    return getLeafCategoryIds(category).every((id) =>
-      scopeLeafIds.includes(id),
-    );
+    return getLiveLeafIds(category).every((id) => scopeLeafIds.includes(id));
   };
 
   const selectedCategories = parsedCategories.filter(isWithinScope);
@@ -125,6 +132,7 @@ const ProductsFilters = () => {
       <ProductsSort sort={sort} onChange={handleSortChange} />
 
       <ProductsCategoryFilter
+        categories={categories}
         selectedCategories={selectedCategories}
         onToggle={handleCategoryToggle}
         scopeCategoryId={scopeCategoryId}

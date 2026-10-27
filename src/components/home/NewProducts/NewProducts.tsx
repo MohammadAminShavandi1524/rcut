@@ -1,15 +1,14 @@
+"use client";
+
 import Link from "next/link";
 
 import ProductCard from "../FeaturedProducts/ProductCard";
-import { products } from "@/components/products/products.data";
 
-const newProducts = products
-  .filter((product) => product.isNew)
-  .sort(
-    (a, b) => new Date(b.created).getTime() - new Date(a.created).getTime(),
-  );
+import { useNewProducts } from "./useNewProducts";
 
 const NewProducts = () => {
+  const newProducts = useNewProducts();
+
   return (
     <section className="py-12 sm:py-16 lg:py-20 xl:py-24">
       <div className="w90 mx-auto" dir="rtl">

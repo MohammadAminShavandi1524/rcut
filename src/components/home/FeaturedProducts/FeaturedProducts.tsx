@@ -6,11 +6,11 @@ import { useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 
 import ProductCard from "./ProductCard";
-import { products } from "@/components/products/products.data";
-
-const featuredProducts = products.filter((product) => product.isBestSeller);
+import { useFeaturedProducts } from "./useFeaturedProducts";
 
 const FeaturedProducts = () => {
+  const { products: featuredProducts } = useFeaturedProducts();
+
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     direction: "rtl",

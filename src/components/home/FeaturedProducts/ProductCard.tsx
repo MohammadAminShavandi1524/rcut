@@ -1,14 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import type { Product } from "@/components/products/products.data";
+import type { FeaturedProduct } from "./featured-products.api";
 
 type Props = {
-  product: Product;
+  product: FeaturedProduct;
 };
 
 const ProductCard = ({ product }: Props) => {
-  const productHref = `/products/${product.slug}`;
+  const productHref = `/products/${product.id}`;
 
   return (
     <article

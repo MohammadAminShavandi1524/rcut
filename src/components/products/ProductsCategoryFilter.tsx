@@ -5,13 +5,12 @@ import { Check, ChevronDown, ChevronLeft } from "lucide-react";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import {
-  categoryTree,
-  findCategoryById,
-  type CategoryNode,
-} from "./products.categories";
+import type { CategoryNode } from "./products.categories";
+
+import { findLiveCategoryById } from "./products-category-tree";
 
 type Props = {
+  categories: CategoryNode[];
   selectedCategories: number[];
   onToggle: (id: number) => void;
   scopeCategoryId?: number;
@@ -113,6 +112,7 @@ const CategoryRow = ({
 };
 
 const ProductsCategoryFilter = ({
+  categories,
   selectedCategories,
   onToggle,
   scopeCategoryId,
@@ -121,10 +121,10 @@ const ProductsCategoryFilter = ({
 
   const scopedCategory =
     scopeCategoryId !== undefined
-      ? findCategoryById(scopeCategoryId)
+      ? findLiveCategoryById(scopeCategoryId, categories)
       : undefined;
 
-  const visibleCategories = scopedCategory ? [scopedCategory] : categoryTree;
+  const visibleCategories = scopedCategory ? [scopedCategory] : categories;
 
   return (
     <div className="border-border border-t">

@@ -1,7 +1,122 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 import FooterColumn from "./FooterColumn";
 import FooterBottom from "./FooterBottom";
 
+interface Category {
+  id: number;
+  name: string;
+  index: number;
+  parent: {
+    id: number;
+    name: string;
+  } | null;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  top_seller: boolean;
+}
+
+interface FooterItem {
+  title: string;
+  href: string;
+}
+
+const MAX_ITEMS = 6;
+
 const Footer = () => {
+  const [categories, setCategories] = useState<FooterItem[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<FooterItem[]>([]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("/api/categories", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("دریافت دسته بندی‌ها ناموفق بود.");
+        }
+
+        const data: Category[] = await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error("ساختار دسته بندی‌ها نامعتبر است.");
+        }
+
+        const items = data
+          .filter((category) => category.parent === null)
+          .sort((a, b) => a.index - b.index)
+          .slice(0, MAX_ITEMS)
+          .map((category) => ({
+            title: category.name,
+            href:
+              category.name === "برند یاماسا"
+                ? "/yamasa"
+                : `/products?scope=${category.id}&categories=${category.id}`,
+          }));
+
+        if (!controller.signal.aborted) {
+          setCategories(items);
+        }
+      } catch (error) {
+        if (controller.signal.aborted) return;
+
+        console.error("GET FOOTER CATEGORIES ERROR:", error);
+      }
+    };
+
+    const fetchFeaturedProducts = async () => {
+      try {
+        const response = await fetch("/api/products", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("دریافت محصولات منتخب ناموفق بود.");
+        }
+
+        const data: Product[] = await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error("ساختار محصولات نامعتبر است.");
+        }
+
+        const items = data
+          .filter((product) => product.top_seller === true)
+          .slice(0, MAX_ITEMS)
+          .map((product) => ({
+            title: product.name,
+            href: `/products/${product.id}`,
+          }));
+
+        if (!controller.signal.aborted) {
+          setFeaturedProducts(items);
+        }
+      } catch (error) {
+        if (controller.signal.aborted) return;
+
+        console.error("GET FOOTER PRODUCTS ERROR:", error);
+      }
+    };
+
+    void fetchCategories();
+    void fetchFeaturedProducts();
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
   return (
     <footer className="bg-footer-bg text-footer-foreground" dir="rtl">
       <div className="w90 3xl:py-20 py-10 sm:py-12 lg:py-12 xl:py-14 2xl:py-16">
@@ -36,57 +151,9 @@ const Footer = () => {
             ]}
           />
 
-          <FooterColumn
-            title="دسته‌بندی‌ها"
-            items={[
-              {
-                title: "ابزار تراشکاری",
-                href: "/products?scope=1&categories=1",
-              },
-              {
-                title: "ابزار فرزکاری",
-                href: "/products?scope=12&categories=12",
-              },
-              {
-                title: "فرز انگشتی",
-                href: "/products?scope=3&categories=3",
-              },
-              {
-                title: "مته و سوراخکاری",
-                href: "/products?scope=4&categories=4",
-              },
-              {
-                title: "قلاویز و رزوه‌زنی",
-                href: "/products?scope=5&categories=5",
-              },
-            ]}
-          />
+          <FooterColumn title="دسته‌بندی‌ها" items={categories} />
 
-          <FooterColumn
-            title="محصولات منتخب"
-            items={[
-              {
-                title: "اینسرت تراشکاری کارباید",
-                href: "/products/carbide-turning-insert",
-              },
-              {
-                title: "فرز انگشتی کارباید",
-                href: "/products/carbide-end-mill",
-              },
-              {
-                title: "مته صنعتی",
-                href: "/products/industrial-drill",
-              },
-              {
-                title: "هلدر تراشکاری",
-                href: "/products/turning-holder",
-              },
-              {
-                title: "ابزارگیر CNC",
-                href: "/products/cnc-tool-holder",
-              },
-            ]}
-          />
+          <FooterColumn title="محصولات منتخب" items={featuredProducts} />
 
           <div className="mt-5 text-right sm:mt-0">
             <h3 className="text-footer-foreground 3xl:text-lg text-base font-bold lg:text-[15px] xl:text-base 2xl:text-[17px]">

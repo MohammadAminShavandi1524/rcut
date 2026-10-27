@@ -1,67 +1,117 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, ChevronLeft, SlidersHorizontal } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
+import { cn } from "@/lib/utils";
+
 import ProductCard from "./ProductCard";
 import ProductsFilters from "./ProductsFilters";
-
-import { products, type CategorySlug } from "./products.data";
+import { ProductsListSkeleton } from "./ProductsSkeleton";
 
 import {
-  findCategoryByKey,
-  findCategoryById,
-  getCategoryPath,
-  getLeafCategoryIds,
-  matchesCategoryFilter,
-} from "./products.categories";
+  getProducts,
+  getCategories,
+  type ApiProduct,
+  type ApiCategory,
+} from "./products.api";
+
+import {
+  buildCategoryTree,
+  findLiveCategoryByKey,
+  findLiveCategoryById,
+  getLiveCategoryPath,
+  getLiveLeafIds,
+  matchesLiveCategoryFilter,
+} from "./products-category-tree";
+
+import type { CategoryNode } from "./products.categories";
 
 type Props = {
-  categorySlug?: CategorySlug;
+  categorySlug?: string;
 };
 
 const ProductsPage = ({ categorySlug }: Props) => {
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const [products, setProducts] = useState<ApiProduct[]>([]);
+  const [categories, setCategories] = useState<ApiCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+
   const searchParams = useSearchParams();
 
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadProducts = async () => {
+      try {
+        const [productsData, categoriesData] = await Promise.all([
+          getProducts(controller.signal),
+          getCategories(controller.signal),
+        ]);
+
+        if (controller.signal.aborted) return;
+
+        if (!Array.isArray(productsData) || !Array.isArray(categoriesData)) {
+          throw new Error("ساختار اطلاعات محصولات نامعتبر است.");
+        }
+
+        setProducts(productsData);
+        setCategories(categoriesData);
+        setLoadError(false);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+
+        console.error("GET PRODUCTS PAGE ERROR:", error);
+        setLoadError(true);
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadProducts();
+
+    return () => controller.abort();
+  }, []);
+
+  const categoryTree = useMemo(
+    () => buildCategoryTree(categories),
+    [categories],
+  );
+
   const sort = searchParams.get("sort") || "newest";
-
   const categoriesParam = searchParams.get("categories") ?? "";
-
   const scopeParam = searchParams.get("scope");
-
   const bestSellerOnly = searchParams.get("bestSeller") === "1";
-
   const selectedProduct = searchParams.get("product");
 
-  // دسته‌بندی انتخاب‌شده از Dropdown یا Footer
   const scopeCategory = scopeParam
-    ? findCategoryByKey(scopeParam)
+    ? findLiveCategoryByKey(scopeParam, categoryTree)
     : categorySlug
-      ? findCategoryByKey(categorySlug)
+      ? findLiveCategoryByKey(categorySlug, categoryTree)
       : undefined;
 
-  // تمام دسته‌بندی‌های نهایی متعلق به Scope
   const scopeLeafIds = useMemo(
-    () => (scopeCategory ? getLeafCategoryIds(scopeCategory) : []),
+    () => (scopeCategory ? getLiveLeafIds(scopeCategory) : []),
     [scopeCategory],
   );
 
-  // مسیر سلسله‌مراتبی Breadcrumb
   const breadcrumbCategories = scopeCategory
-    ? getCategoryPath(scopeCategory.id)
+    ? getLiveCategoryPath(scopeCategory.id, categoryTree)
     : [];
 
-  // دسته‌بندی‌هایی که داخل فیلتر انتخاب شده‌اند
   const selectedCategoryIds = useMemo(() => {
     const ids = [
       ...new Set(
         categoriesParam
           .split(",")
           .filter(Boolean)
-          .map((value) => findCategoryByKey(value)?.id)
+          .map((value) => findLiveCategoryByKey(value, categoryTree)?.id)
           .filter((id): id is number => id !== undefined),
       ),
     ];
@@ -70,68 +120,51 @@ const ProductsPage = ({ categorySlug }: Props) => {
       return ids;
     }
 
-    // فقط دسته‌بندی‌های متعلق به Scope مجازند
     const filteredIds = ids.filter((id) => {
-      const category = findCategoryById(id);
+      const category = findLiveCategoryById(id, categoryTree);
 
       if (!category) return false;
 
-      return getLeafCategoryIds(category).every((leafId) =>
+      return getLiveLeafIds(category).every((leafId) =>
         scopeLeafIds.includes(leafId),
       );
     });
 
-    // اگر فیلتر اختصاصی انتخاب نشده، کل Scope نمایش داده می‌شود
     return filteredIds.length > 0 ? filteredIds : [scopeCategory.id];
-  }, [categoriesParam, scopeCategory, scopeLeafIds]);
+  }, [categoriesParam, categoryTree, scopeCategory, scopeLeafIds]);
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
-    // Single Product Filter
     if (selectedProduct) {
-      result = result.filter((product) => product.slug === selectedProduct);
+      result = result.filter(
+        (product) => String(product.id) === selectedProduct,
+      );
     }
 
-    // Scope Filter
-    // انتخاب دسته‌بندی از Dropdown یا Footer
     if (scopeCategory) {
       result = result.filter((product) =>
-        scopeLeafIds.includes(product.categoryId),
+        scopeLeafIds.includes(product.category.id),
       );
     }
 
-    // Category Page Filter
-    if (categorySlug && !scopeParam) {
-      const category = findCategoryByKey(categorySlug);
-
-      if (category) {
-        const leafIds = getLeafCategoryIds(category);
-
-        result = result.filter((product) =>
-          leafIds.includes(product.categoryId),
-        );
-      }
-    }
-
-    // Category Checkbox Filters
     if (selectedCategoryIds.length > 0) {
       result = result.filter((product) =>
-        matchesCategoryFilter(product.categoryId, selectedCategoryIds),
+        matchesLiveCategoryFilter(
+          product.category.id,
+          selectedCategoryIds,
+          categoryTree,
+        ),
       );
     }
 
-    // Best Seller Filter
     if (bestSellerOnly) {
-      result = result.filter((product) => product.isBestSeller);
+      result = result.filter((product) => product.top_seller === true);
     }
 
-    // Sort
     result.sort((a, b) => {
-      if (sort === "best-selling") {
-        if (a.isBestSeller !== b.isBestSeller) {
-          return a.isBestSeller ? -1 : 1;
-        }
+      if (sort === "best-selling" && a.top_seller !== b.top_seller) {
+        return a.top_seller ? -1 : 1;
       }
 
       return new Date(b.created).getTime() - new Date(a.created).getTime();
@@ -139,21 +172,38 @@ const ProductsPage = ({ categorySlug }: Props) => {
 
     return result;
   }, [
-    categorySlug,
-    scopeParam,
+    products,
+    selectedProduct,
     scopeCategory,
     scopeLeafIds,
     selectedCategoryIds,
     bestSellerOnly,
     sort,
-    selectedProduct,
+    categoryTree,
   ]);
 
   const showProductCategory = selectedCategoryIds.length !== 1;
 
+  if (loading) {
+    return <ProductsListSkeleton />;
+  }
+
+  if (loadError) {
+    return (
+      <main
+        dir="rtl"
+        className="bg-background flex min-h-screen items-center justify-center"
+      >
+        <p className="text-muted-foreground text-sm">
+          دریافت اطلاعات محصولات ناموفق بود.
+        </p>
+      </main>
+    );
+  }
+
   return (
     <main dir="rtl" className="bg-background min-h-screen">
-      <section className="w90 mx-auto py-6 sm:py-8 lg:px-6 xl:px-8 3xl:px-10">
+      <section className="w90 3xl:px-10 mx-auto py-6 sm:py-8 lg:px-6 xl:px-8">
         {/* Breadcrumb */}
         <nav
           aria-label="مسیر صفحه"
@@ -239,25 +289,31 @@ const ProductsPage = ({ categorySlug }: Props) => {
             <ChevronDown
               size={19}
               strokeWidth={1.7}
-              className={`text-muted-foreground transition-transform duration-300 ${
-                filtersOpen ? "rotate-180" : ""
-              }`}
+              className={cn(
+                "text-muted-foreground transition-transform duration-300",
+                filtersOpen && "rotate-180",
+              )}
             />
           </button>
         </div>
 
         {/* Main */}
-        <div className="mt-4 grid min-w-0 items-start gap-4 lg:mt-8 lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-5 xl:grid-cols-[270px_minmax(0,1fr)] 3xl:grid-cols-[300px_minmax(0,1fr)]">
+        <div className="3xl:grid-cols-[300px_minmax(0,1fr)] mt-4 grid min-w-0 items-start gap-4 lg:mt-8 lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-5 xl:grid-cols-[270px_minmax(0,1fr)]">
           {/* Sidebar */}
-          <div id="products-filters-panel"
-            className={`${filtersOpen ? "block" : "hidden"} min-w-0 lg:sticky lg:top-28 lg:block`}>
-            <ProductsFilters />
+          <div
+            id="products-filters-panel"
+            className={cn(
+              "min-w-0 lg:sticky lg:top-28 lg:block",
+              filtersOpen ? "block" : "hidden",
+            )}
+          >
+            <ProductsFilters categories={categoryTree} />
           </div>
 
           {/* Products */}
           <div>
             {filteredProducts.length > 0 ? (
-              <div className="grid min-w-0 grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 mlg:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 3xl:gap-x-5">
+              <div className="mlg:grid-cols-3 3xl:grid-cols-4 3xl:gap-x-5 grid min-w-0 grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                 {filteredProducts.map((product) => (
                   <ProductCard
                     key={product.id}
