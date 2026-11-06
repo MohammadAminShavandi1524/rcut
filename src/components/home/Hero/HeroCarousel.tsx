@@ -8,7 +8,7 @@ import HeroSlide from "./HeroSlide";
 import HeroControls from "./HeroControls";
 import { heroSlides } from "./hero.data";
 
-const AUTOPLAY_DURATION = 6000;
+const AUTOPLAY_DURATION = 3000;
 
 const HeroCarousel = () => {
   const [emblaRef, emblaApi] = useEmblaCarousel({
