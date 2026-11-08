@@ -44,7 +44,7 @@ export default function RootLayout({
           <div className="bg-background text-foreground relative min-h-screen">
             <Header />
 
-            <main className="headerPadding">
+            <main className="lg:headerPadding">
               <CustomToastProvider>
                 <SmoothScrollProvider>{children}</SmoothScrollProvider>
               </CustomToastProvider>
