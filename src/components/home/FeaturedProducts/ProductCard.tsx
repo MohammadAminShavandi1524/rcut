@@ -41,7 +41,7 @@ const ProductCard = ({ product }: Props) => {
             {product.name}
           </h3>
 
-          <p className="text-muted-foreground mt-2 line-clamp-2 min-h-[44px] text-[12px] leading-[22px] sm:mt-3 sm:min-h-[48px] sm:text-[13px] sm:leading-6 xl:text-sm">
+          <p className="text-muted-foreground mt-2 line-clamp-3 min-h-[44px] text-[12px] leading-[22px] sm:mt-3 sm:min-h-[48px] sm:text-[13px] sm:leading-6 xl:text-sm text-justify">
             {product.description}
           </p>
         </Link>

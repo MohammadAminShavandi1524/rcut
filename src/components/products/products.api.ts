@@ -10,12 +10,22 @@ export interface ApiCategory {
   created: string;
 }
 
+export interface ApiBrand {
+  id: number;
+  name: string;
+  description: string;
+  image: string;
+  index: number;
+  created: string;
+}
+
 export interface ApiProduct {
   id: number;
   name: string;
   description: string;
   image: string;
   category: ApiCategory;
+  brand: ApiBrand | null;
   new: boolean;
   top_seller: boolean;
   created: string;
@@ -39,6 +49,9 @@ export const getProducts = (signal?: AbortSignal) =>
 
 export const getCategories = (signal?: AbortSignal) =>
   getJson<ApiCategory[]>("/api/categories", signal);
+
+export const getBrands = (signal?: AbortSignal) =>
+  getJson<ApiBrand[]>("/api/brands", signal);
 
 export const getProduct = (id: number, signal?: AbortSignal) =>
   getJson<ApiProduct>(`/api/products/${id}`, signal);

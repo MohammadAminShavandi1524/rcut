@@ -30,6 +30,7 @@ const CategoryRow = ({
   onToggle,
 }: CategoryRowProps) => {
   const hasChildren = Boolean(category.children?.length);
+
   const checked = selectedCategories.includes(category.id);
 
   const [expanded, setExpanded] = useState(level === 0);
@@ -39,7 +40,7 @@ const CategoryRow = ({
       <div className="group flex min-h-9 items-center gap-2">
         <label
           className="flex min-w-0 flex-1 cursor-pointer items-center gap-3"
-          style={{ paddingRight: `${level * 14}px` }}
+          style={{ paddingRight: `${level * 8}px` }}
         >
           <span
             className={`flex size-[17px] shrink-0 items-center justify-center rounded-[4px] border transition-all duration-200 ${
@@ -126,6 +127,28 @@ const ProductsCategoryFilter = ({
 
   const visibleCategories = scopedCategory ? [scopedCategory] : categories;
 
+  const isSingleLeaf =
+    visibleCategories.length === 1 && !visibleCategories[0].children?.length;
+
+  const scrollKey =
+    scopeCategoryId !== undefined
+      ? `scope-${scopeCategoryId}`
+      : "all-categories";
+
+  const renderCategories = () => (
+    <div dir="rtl" className="flex flex-col gap-2">
+      {visibleCategories.map((category) => (
+        <CategoryRow
+          key={category.id}
+          category={category}
+          level={0}
+          selectedCategories={selectedCategories}
+          onToggle={onToggle}
+        />
+      ))}
+    </div>
+  );
+
   return (
     <div className="border-border border-t">
       <button
@@ -150,27 +173,26 @@ const ProductsCategoryFilter = ({
           categoriesOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         }`}
       >
-        <div className="overflow-y-hidden">
+        <div className="min-h-0 overflow-hidden">
           <div className="px-6 pb-6">
-            <ScrollArea
-              dir="rtl"
-              lockWheel
-              className="h-auto max-h-[280px] w-full"
-              viewportClassName="!h-auto !max-h-[280px]"
-              scrollBarClassName="-me-3"
-            >
-              <div dir="rtl" className="flex flex-col gap-2">
-                {visibleCategories.map((category) => (
-                  <CategoryRow
-                    key={category.id}
-                    category={category}
-                    level={0}
-                    selectedCategories={selectedCategories}
-                    onToggle={onToggle}
-                  />
-                ))}
-              </div>
-            </ScrollArea>
+            {visibleCategories.length === 0 ? (
+              <p className="text-muted-foreground text-xs leading-6">
+                دسته‌بندی‌ای برای نمایش وجود ندارد.
+              </p>
+            ) : isSingleLeaf ? (
+              renderCategories()
+            ) : (
+              <ScrollArea
+                key={scrollKey}
+                dir="rtl"
+                lockWheel
+                className="h-auto max-h-[280px] w-full"
+                viewportClassName="!h-auto !max-h-[280px]"
+                scrollBarClassName="-me-3"
+              >
+                {renderCategories()}
+              </ScrollArea>
+            )}
           </div>
         </div>
       </div>
