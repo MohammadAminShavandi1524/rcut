@@ -1,11 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+
+import { createPortal } from "react-dom";
 import Link from "next/link";
-import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePathname } from "next/navigation";
 
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+
 import type { CategoryNode } from "@/components/products/products.categories";
 
 interface ApiCategory {
@@ -20,10 +25,22 @@ interface ApiCategory {
   created: string;
 }
 
-type CategoryMenuProps = {
+type MenuPanel = {
+  id: number;
   items: CategoryNode[];
-  isVisible?: boolean;
+  left: number;
+  top: number;
+  width: number;
+  maxHeight: number;
+  side: "left" | "right";
 };
+
+const MENU_GAP = 6;
+const VIEWPORT_GAP = 8;
+const MAX_MENU_HEIGHT = 560;
+const ITEM_HEIGHT = 44;
+const MENU_PADDING = 16;
+const CLOSE_DELAY = 180;
 
 function buildCategoryTree(categories: ApiCategory[]): CategoryNode[] {
   const nodes = new Map<number, CategoryNode>();
@@ -64,174 +81,120 @@ function getCategoryHref(category: CategoryNode) {
   return `/products?scope=${category.id}&categories=${category.id}`;
 }
 
-function CategoryMenu({ items, isVisible = true }: CategoryMenuProps) {
-  const [openItem, setOpenItem] = useState<number | null>(null);
-  const [submenuSide, setSubmenuSide] = useState<"left" | "right">("left");
-  const [submenuTop, setSubmenuTop] = useState(0);
+function getPanelHeight(itemCount: number, maxHeight: number) {
+  return Math.min(itemCount * ITEM_HEIGHT + MENU_PADDING, maxHeight);
+}
 
-  const activeItemRef = useRef<HTMLDivElement | null>(null);
-  const submenuRef = useRef<HTMLDivElement | null>(null);
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(value, max));
+}
 
-  useEffect(() => {
-    if (!isVisible) {
-      setOpenItem(null);
-      setSubmenuTop(0);
-      activeItemRef.current = null;
-      return;
-    }
+/*
+ * Calculate each panel's width based on its own longest label.
+ */
+function getPanelWidth(items: CategoryNode[], referenceElement: HTMLElement) {
+  const styles = window.getComputedStyle(referenceElement);
 
-    if (openItem === null || !activeItemRef.current || !submenuRef.current) {
-      return;
-    }
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
 
-    const anchorRect = activeItemRef.current.getBoundingClientRect();
-    const submenuRect = submenuRef.current.getBoundingClientRect();
+  if (!context) {
+    return Math.min(220, window.innerWidth - VIEWPORT_GAP * 2);
+  }
 
-    const minTop = 8;
-    const maxTop = Math.max(
-      minTop,
-      window.innerHeight - submenuRect.height - 8,
+  context.font = [
+    styles.fontStyle,
+    styles.fontWeight,
+    styles.fontSize,
+    styles.fontFamily,
+  ].join(" ");
+
+  let longestTextWidth = 0;
+
+  for (const item of items) {
+    longestTextWidth = Math.max(
+      longestTextWidth,
+      context.measureText(item.name).width,
     );
+  }
 
-    const targetTop = Math.min(Math.max(anchorRect.top, minTop), maxTop);
+  const hasChildren = items.some((item) => Boolean(item.children?.length));
 
-    setSubmenuTop(targetTop - anchorRect.top);
-  }, [openItem, isVisible]);
+  // Right item padding: 8px
+  // Left item padding: 12px
+  // Panel padding: 8px each side
+  // Scrollbar allowance: 12px
+  const horizontalSpacing = 8 + 12 + 16 + 12 + 2;
 
-  const handleItemEnter = (category: CategoryNode, element: HTMLDivElement) => {
-    if (!category.children?.length) {
-      setOpenItem(null);
-      setSubmenuTop(0);
-      activeItemRef.current = null;
-      return;
-    }
+  const chevronSpacing = hasChildren ? 16 + 8 : 0;
 
-    const rect = element.getBoundingClientRect();
-    const leftSpace = rect.left;
-    const rightSpace = window.innerWidth - rect.right;
-    const submenuWidth = 226;
-
-    setSubmenuSide(
-      leftSpace >= submenuWidth || leftSpace >= rightSpace ? "left" : "right",
-    );
-
-    activeItemRef.current = element;
-    setSubmenuTop(0);
-    setOpenItem(category.id);
-  };
-
-  const closeSubmenu = () => {
-    setOpenItem(null);
-    setSubmenuTop(0);
-    activeItemRef.current = null;
-  };
-
-  return (
-    <div className="w-full space-y-0.5">
-      {items.map((category) => {
-        const href = getCategoryHref(category);
-        const hasChildren = Boolean(category.children?.length);
-        const isOpen = openItem === category.id;
-
-        return (
-          <div
-            key={category.id}
-            className="relative w-full"
-            onMouseEnter={(event) =>
-              handleItemEnter(category, event.currentTarget)
-            }
-            onMouseLeave={closeSubmenu}
-          >
-            <Link
-              href={href}
-              aria-haspopup={hasChildren ? true : undefined}
-              aria-expanded={hasChildren ? isOpen : undefined}
-              onFocus={(event) => {
-                const parent = event.currentTarget.parentElement;
-
-                if (parent instanceof HTMLDivElement) {
-                  handleItemEnter(category, parent);
-                }
-              }}
-              className={cn(
-                "group/item text-foreground/80 relative flex h-[42px] w-full",
-                "items-center justify-start gap-2 rounded-md px-3.5",
-                "text-right text-[14px] transition-colors duration-200",
-                "hover:bg-secondary hover:text-custom-primary",
-                "focus-visible:bg-secondary focus-visible:text-custom-primary",
-                isOpen && "bg-secondary text-custom-primary",
-              )}
-            >
-              <span
-                className={cn(
-                  "bg-custom-primary absolute right-0 h-0 w-[2px]",
-                  "rounded-full transition-all duration-200",
-                  "group-hover/item:h-5 group-focus-visible/item:h-5",
-                  isOpen && "h-5",
-                )}
-              />
-
-              <span className="min-w-0 flex-1 text-right">{category.name}</span>
-
-              {hasChildren &&
-                (isOpen && submenuSide === "right" ? (
-                  <ChevronRight className="text-custom-primary size-4 shrink-0" />
-                ) : (
-                  <ChevronLeft
-                    className={cn(
-                      "size-4 shrink-0 transition-transform duration-200",
-                      isOpen && "text-custom-primary -translate-x-0.5",
-                    )}
-                  />
-                ))}
-            </Link>
-
-            {hasChildren && (
-              <div
-                ref={isOpen ? submenuRef : null}
-                style={{
-                  top: isOpen ? `${submenuTop}px` : 0,
-                }}
-                className={cn(
-                  "absolute z-[60] w-[210px]",
-                  "transition-all duration-200",
-                  submenuSide === "left"
-                    ? "right-[calc(100%_+_8px)]"
-                    : "left-[calc(100%_+_8px)]",
-                  isOpen
-                    ? "pointer-events-auto visible opacity-100"
-                    : "pointer-events-none invisible opacity-0",
-                )}
-              >
-                {/* ناحیه عبور موس بین دو منو */}
-                <div
-                  aria-hidden="true"
-                  className={cn(
-                    "absolute top-0 h-full w-2",
-                    submenuSide === "left" ? "-right-2" : "-left-2",
-                  )}
-                />
-
-                <div className="bg-background border-border relative w-[210px] rounded-lg border p-2 shadow-[0_10px_30px_rgba(0,0,0,0.09)]">
-                  <CategoryMenu items={category.children!} isVisible={isOpen} />
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
+  const naturalWidth = Math.ceil(
+    longestTextWidth + horizontalSpacing + chevronSpacing + 8,
   );
+
+  return clamp(naturalWidth, 120, window.innerWidth - VIEWPORT_GAP * 2);
 }
 
 const ProductsDropdown = () => {
   const pathname = usePathname();
-  const isActive = pathname.startsWith("/products");
+  const menuId = useId();
+
+  const triggerRef = useRef<HTMLLIElement>(null);
+
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [mounted, setMounted] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const [categories, setCategories] = useState<CategoryNode[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
 
+  const [rootPanel, setRootPanel] = useState<MenuPanel | null>(null);
+
+  const [childPanels, setChildPanels] = useState<MenuPanel[]>([]);
+
+  const isActive = pathname.startsWith("/products");
+
+  const categoriesReady = !loading && !loadError && categories.length > 0;
+
+  const clearCloseTimer = useCallback(() => {
+    if (closeTimerRef.current !== null) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  }, []);
+
+  const closeMenu = useCallback(() => {
+    clearCloseTimer();
+
+    setIsOpen(false);
+    setRootPanel(null);
+    setChildPanels([]);
+  }, [clearCloseTimer]);
+
+  const scheduleClose = useCallback(() => {
+    clearCloseTimer();
+
+    closeTimerRef.current = setTimeout(() => {
+      setIsOpen(false);
+      setRootPanel(null);
+      setChildPanels([]);
+      closeTimerRef.current = null;
+    }, CLOSE_DELAY);
+  }, [clearCloseTimer]);
+
+  useEffect(() => {
+    setMounted(true);
+
+    return () => {
+      clearCloseTimer();
+    };
+  }, [clearCloseTimer]);
+
+  /*
+   * Fetch categories from the existing API.
+   */
   useEffect(() => {
     let active = true;
 
@@ -276,36 +239,362 @@ const ProductsDropdown = () => {
     };
   }, []);
 
-  const categoriesReady = !loading && !loadError && categories.length > 0;
+  /*
+   * Root menu:
+   * Width determined by the longest root category.
+   */
+  const openRootMenu = useCallback(() => {
+    if (!categoriesReady || !triggerRef.current) {
+      return;
+    }
+
+    clearCloseTimer();
+
+    const rect = triggerRef.current.getBoundingClientRect();
+
+    const width = getPanelWidth(categories, triggerRef.current);
+
+    const left = clamp(
+      rect.right - width,
+      VIEWPORT_GAP,
+      window.innerWidth - width - VIEWPORT_GAP,
+    );
+
+    const preferredTop = rect.bottom + MENU_GAP;
+
+    const top = clamp(
+      preferredTop,
+      VIEWPORT_GAP,
+      window.innerHeight - VIEWPORT_GAP - 60,
+    );
+
+    const maxHeight = Math.max(
+      44,
+      Math.min(MAX_MENU_HEIGHT, window.innerHeight - top - VIEWPORT_GAP),
+    );
+
+    setRootPanel({
+      id: 0,
+      items: categories,
+      left,
+      top,
+      width,
+      maxHeight,
+      side: "left",
+    });
+
+    setChildPanels([]);
+    setIsOpen(true);
+  }, [categories, categoriesReady, clearCloseTimer]);
+
+  /*
+   * Child menu:
+   * Each level calculates its own width.
+   */
+  const openChildMenu = useCallback(
+    (category: CategoryNode, level: number, element: HTMLAnchorElement) => {
+      clearCloseTimer();
+
+      if (!category.children?.length) {
+        setChildPanels((previous) =>
+          previous.length > level ? previous.slice(0, level) : previous,
+        );
+
+        return;
+      }
+
+      const rect = element.getBoundingClientRect();
+
+      const width = getPanelWidth(category.children, element);
+
+      const leftSpace = rect.left - VIEWPORT_GAP;
+
+      const rightSpace = window.innerWidth - rect.right - VIEWPORT_GAP;
+
+      const side: "left" | "right" =
+        leftSpace >= width + MENU_GAP || leftSpace >= rightSpace
+          ? "left"
+          : "right";
+
+      const preferredLeft =
+        side === "left" ? rect.left - width - MENU_GAP : rect.right + MENU_GAP;
+
+      const left = clamp(
+        preferredLeft,
+        VIEWPORT_GAP,
+        window.innerWidth - width - VIEWPORT_GAP,
+      );
+
+      const maxHeight = Math.max(
+        44,
+        Math.min(MAX_MENU_HEIGHT, window.innerHeight - VIEWPORT_GAP * 2),
+      );
+
+      const panelHeight = getPanelHeight(category.children.length, maxHeight);
+
+      const top = clamp(
+        rect.top,
+        VIEWPORT_GAP,
+        window.innerHeight - panelHeight - VIEWPORT_GAP,
+      );
+
+      const nextPanel: MenuPanel = {
+        id: category.id,
+        items: category.children,
+        left,
+        top,
+        width,
+        maxHeight,
+        side,
+      };
+
+      setChildPanels((previous) => {
+        const current = previous[level];
+
+        if (
+          current?.id === nextPanel.id &&
+          current.left === nextPanel.left &&
+          current.top === nextPanel.top &&
+          current.width === nextPanel.width &&
+          current.maxHeight === nextPanel.maxHeight
+        ) {
+          return previous;
+        }
+
+        return [...previous.slice(0, level), nextPanel];
+      });
+    },
+    [clearCloseTimer],
+  );
+
+  /*
+   * Close menu when pathname changes.
+   */
+  useEffect(() => {
+    closeMenu();
+  }, [pathname, closeMenu]);
+
+  /*
+   * Keyboard, outside click, resize and scroll behavior.
+   */
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeMenu();
+
+        triggerRef.current?.querySelector("a")?.focus();
+      }
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+
+      if (!(target instanceof Element)) {
+        closeMenu();
+        return;
+      }
+
+      if (
+        triggerRef.current?.contains(target) ||
+        target.closest("[data-products-menu-panel]")
+      ) {
+        return;
+      }
+
+      closeMenu();
+    };
+
+    const handleResize = () => {
+      closeMenu();
+    };
+
+    const handleWindowScroll = () => {
+      closeMenu();
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    window.addEventListener("resize", handleResize);
+
+    window.addEventListener("scroll", handleWindowScroll, { passive: true });
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+
+      document.removeEventListener("pointerdown", handlePointerDown);
+
+      window.removeEventListener("resize", handleResize);
+
+      window.removeEventListener("scroll", handleWindowScroll);
+    };
+  }, [isOpen, closeMenu]);
+
+  /*
+   * Render one independently scrollable panel.
+   */
+  const renderPanel = (panel: MenuPanel, level: number) => {
+    const height = getPanelHeight(panel.items.length, panel.maxHeight);
+
+    return (
+      <div
+        key={`${level}-${panel.id}`}
+        data-products-menu-panel
+        dir="rtl"
+        onMouseEnter={clearCloseTimer}
+        onMouseLeave={scheduleClose}
+        style={{
+          position: "fixed",
+          left: panel.left,
+          top: panel.top,
+          width: panel.width,
+          height,
+          zIndex: 200 + level,
+        }}
+        className={cn(
+          "bg-background border-border",
+          "rounded-xl border",
+          "shadow-[0_12px_36px_rgba(0,0,0,0.12)]",
+        )}
+      >
+        <ScrollArea
+          type="auto"
+          lockWheel
+          data-lenis-prevent
+          data-lenis-prevent-wheel
+          className="h-full w-full overflow-hidden rounded-xl"
+          viewportClassName="h-full w-full"
+          scrollBarClassName="w-2"
+          onScrollCapture={() => {
+            setChildPanels((previous) =>
+              previous.length > level ? previous.slice(0, level) : previous,
+            );
+          }}
+        >
+          <div className="space-y-0.5 p-2">
+            {panel.items.map((category) => {
+              const hasChildren = Boolean(category.children?.length);
+
+              const openedChild = childPanels[level];
+
+              const isSelected = hasChildren && openedChild?.id === category.id;
+
+              const href = getCategoryHref(category);
+
+              return (
+                <Link
+                  key={category.id}
+                  href={href}
+                 
+                  aria-haspopup={hasChildren ? "menu" : undefined}
+                  aria-expanded={hasChildren ? isSelected : undefined}
+                  onMouseEnter={(event) =>
+                    openChildMenu(category, level, event.currentTarget)
+                  }
+                  onFocus={(event) =>
+                    openChildMenu(category, level, event.currentTarget)
+                  }
+                  onClick={closeMenu}
+                  className={cn(
+                    "group/item relative flex h-[42px]",
+                    "w-full min-w-0 items-center gap-2",
+                    "rounded-lg pr-2 pl-3",
+                    "text-right text-[13px]",
+                    "transition-colors duration-150",
+                    "text-foreground/80",
+                    "hover:bg-secondary",
+                    "hover:text-custom-primary",
+                    "focus-visible:bg-secondary",
+                    "focus-visible:text-custom-primary",
+                    "focus-visible:outline-none",
+                    isSelected && "bg-secondary text-custom-primary",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "bg-custom-primary absolute right-0",
+                      "h-0 w-[2px] rounded-full",
+                      "transition-all duration-150",
+                      "group-hover/item:h-5",
+                      "group-focus-visible/item:h-5",
+                      isSelected && "h-5",
+                    )}
+                  />
+
+                  <span className="min-w-0 flex-1 truncate text-right">
+                    {category.name}
+                  </span>
+
+                  {hasChildren &&
+                    (isSelected && openedChild?.side === "right" ? (
+                      <ChevronRight
+                        className="text-custom-primary size-4 shrink-0"
+                        strokeWidth={1.8}
+                      />
+                    ) : (
+                      <ChevronLeft
+                        className={cn(
+                          "size-4 shrink-0",
+                          isSelected && "text-custom-primary",
+                        )}
+                        strokeWidth={1.8}
+                      />
+                    ))}
+                </Link>
+              );
+            })}
+          </div>
+        </ScrollArea>
+      </div>
+    );
+  };
 
   return (
-    <li className="group relative shrink-0">
+    <li
+      ref={triggerRef}
+      className="relative shrink-0"
+      onMouseEnter={openRootMenu}
+      onMouseLeave={scheduleClose}
+      onFocusCapture={openRootMenu}
+    >
       <Link
         href="/products"
+        aria-expanded={categoriesReady ? isOpen : undefined}
+        aria-controls={categoriesReady ? menuId : undefined}
+        onClick={closeMenu}
         className={cn(
-          "3xl:text-[17px] flex items-center gap-1.5 py-2.5 text-[13px] font-medium transition-colors xl:text-[14px] 2xl:text-[15px]",
-          "text-foreground/80 hover:text-custom-primary",
+          "3xl:text-[17px] flex items-center gap-1.5",
+          "py-2.5 text-[13px] font-medium",
+          "transition-colors xl:text-[14px]",
+          "2xl:text-[15px]",
+          "text-foreground/80",
+          "hover:text-custom-primary",
           isActive && "text-custom-primary",
         )}
       >
         محصولات
-        <ChevronDown className="size-4.5 transition-transform duration-300 group-hover:rotate-180" />
+        <ChevronDown
+          className={cn(
+            "size-4.5 transition-transform duration-200",
+            isOpen && "rotate-180",
+          )}
+        />
       </Link>
 
-      {categoriesReady && (
-        <div
-          className={cn(
-            "invisible absolute top-full -right-5 z-50 pt-2",
-            "translate-y-2 opacity-0 transition-all duration-300",
-            "group-hover:visible group-hover:translate-y-0 group-hover:opacity-100",
-            "group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100",
-          )}
-        >
-          <div className="bg-background border-border w-[210px] rounded-lg border p-2 shadow-[0_10px_30px_rgba(0,0,0,0.09)]">
-            <CategoryMenu items={categories} />
-          </div>
-        </div>
-      )}
+      {mounted &&
+        isOpen &&
+        rootPanel &&
+        createPortal(
+          <div id={menuId}>
+            {renderPanel(rootPanel, 0)}
+
+            {childPanels.map((panel, index) => renderPanel(panel, index + 1))}
+          </div>,
+          document.body,
+        )}
     </li>
   );
 };
