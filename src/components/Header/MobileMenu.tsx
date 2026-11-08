@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown, LoaderCircle, X } from "lucide-react";
 
 import {
   MobileSidebarBody,
@@ -12,10 +12,22 @@ import {
   useMobileSidebar,
 } from "@/components/ui/mobile-sidebar";
 
-import { categoryTree } from "@/components/products/products.categories";
+import type { CategoryNode } from "@/components/products/products.categories";
 import { cn } from "@/lib/utils";
 
 import Logo from "./Logo";
+
+interface ApiCategory {
+  id: number;
+  name: string;
+  index: number;
+  child_count: number;
+  parent: {
+    id: number;
+    name: string;
+  } | null;
+  created: string;
+}
 
 const navigationItems = [
   { label: "خانه", href: "/" },
@@ -26,6 +38,48 @@ const navigationItems = [
   { label: "سوالات متداول", href: "/faq" },
 ];
 
+/*
+ * Build the same category tree used by the desktop menu.
+ */
+function buildCategoryTree(categories: ApiCategory[]): CategoryNode[] {
+  const nodes = new Map<number, CategoryNode>();
+
+  const sortedCategories = [...categories].sort((a, b) => a.index - b.index);
+
+  for (const category of sortedCategories) {
+    nodes.set(category.id, {
+      id: category.id,
+      name: category.name,
+      slug: category.name === "برند یاماسا" ? "yamasa" : undefined,
+      children: [],
+    });
+  }
+
+  const roots: CategoryNode[] = [];
+
+  for (const category of sortedCategories) {
+    const node = nodes.get(category.id)!;
+
+    const parent = category.parent ? nodes.get(category.parent.id) : undefined;
+
+    if (parent) {
+      parent.children!.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+
+  return roots;
+}
+
+function getCategoryHref(category: CategoryNode) {
+  if (category.slug === "yamasa") {
+    return "/yamasa";
+  }
+
+  return `/products?scope=${category.id}&categories=${category.id}`;
+}
+
 const MobileMenu = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -33,6 +87,10 @@ const MobileMenu = () => {
   const { closeSidebar } = useMobileSidebar();
 
   const [categoriesOpen, setCategoriesOpen] = useState(false);
+
+  const [categories, setCategories] = useState<CategoryNode[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState(false);
 
   const activeScope = searchParams.get("scope");
 
@@ -43,6 +101,59 @@ const MobileMenu = () => {
     setCategoriesOpen(false);
     closeSidebar();
   };
+
+  /*
+   * Fetch dynamic categories from the existing API.
+   */
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchCategories = async () => {
+      setCategoriesLoading(true);
+      setCategoriesError(false);
+
+      try {
+        const response = await fetch("/api/categories", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("دریافت دسته‌بندی‌ها ناموفق بود.");
+        }
+
+        const data: unknown = await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error("ساختار اطلاعات دسته‌بندی‌ها نامعتبر است.");
+        }
+
+        if (controller.signal.aborted) return;
+
+        const categoryTree = buildCategoryTree(data as ApiCategory[]);
+
+        setCategories(categoryTree);
+        setCategoriesError(false);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+
+        console.error("MOBILE CATEGORIES ERROR:", error);
+
+        setCategories([]);
+        setCategoriesError(true);
+      } finally {
+        if (!controller.signal.aborted) {
+          setCategoriesLoading(false);
+        }
+      }
+    };
+
+    void fetchCategories();
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
 
   return (
     <div dir="rtl" className="flex min-h-full flex-col">
@@ -120,38 +231,71 @@ const MobileMenu = () => {
                         categoriesOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
                       )}
                     >
-                      <div className="min-h-0 overflow-hidden">
+                      <div
+                        className={cn(
+                          "min-h-0",
+                          categoriesOpen
+                            ? "overflow-visible"
+                            : "overflow-hidden",
+                        )}
+                      >
                         <ul className="border-border me-3 mt-1 mb-2 flex flex-col gap-1 border-r ps-1 pe-3">
-                          {categoryTree.map((category) => {
-                            const href =
-                              category.slug === "yamasa"
-                                ? "/yamasa"
-                                : `/products?scope=${category.id}&categories=${category.id}`;
+                          {categoriesLoading && (
+                            <li
+                              role="status"
+                              className="text-muted-foreground flex items-center gap-2 rounded-lg px-3 py-3 text-sm"
+                            >
+                              <LoaderCircle
+                                size={16}
+                                className="text-custom-primary animate-spin"
+                              />
+                              در حال دریافت دسته‌بندی‌ها...
+                            </li>
+                          )}
 
-                            const isCategoryActive =
-                              pathname === "/products" &&
-                              activeScope === String(category.id);
+                          {!categoriesLoading && categoriesError && (
+                            <li className="text-muted-foreground rounded-lg px-3 py-3 text-sm">
+                              دریافت دسته‌بندی‌ها ناموفق بود.
+                            </li>
+                          )}
 
-                            return (
-                              <li key={category.id}>
-                                <Link
-                                  href={href}
-                                  onClick={handleNavigation}
-                                  aria-current={
-                                    isCategoryActive ? "page" : undefined
-                                  }
-                                  tabIndex={categoriesOpen ? 0 : -1}
-                                  className={cn(
-                                    "text-muted-foreground hover:bg-secondary-bg hover:text-custom-primary block rounded-lg px-3 py-3 text-sm transition-colors duration-300",
-                                    isCategoryActive &&
-                                      "bg-secondary-bg text-custom-primary font-medium",
-                                  )}
-                                >
-                                  {category.name}
-                                </Link>
+                          {!categoriesLoading &&
+                            !categoriesError &&
+                            categories.length === 0 && (
+                              <li className="text-muted-foreground rounded-lg px-3 py-3 text-sm">
+                                دسته‌بندی‌ای برای نمایش وجود ندارد.
                               </li>
-                            );
-                          })}
+                            )}
+
+                          {!categoriesLoading &&
+                            !categoriesError &&
+                            categories.map((category) => {
+                              const href = getCategoryHref(category);
+
+                              const isCategoryActive =
+                                pathname === "/products" &&
+                                activeScope === String(category.id);
+
+                              return (
+                                <li key={category.id}>
+                                  <Link
+                                    href={href}
+                                    onClick={handleNavigation}
+                                    aria-current={
+                                      isCategoryActive ? "page" : undefined
+                                    }
+                                    tabIndex={categoriesOpen ? 0 : -1}
+                                    className={cn(
+                                      "text-muted-foreground hover:bg-secondary-bg hover:text-custom-primary block rounded-lg px-3 py-3 text-sm transition-colors duration-300",
+                                      isCategoryActive &&
+                                        "bg-secondary-bg text-custom-primary font-medium",
+                                    )}
+                                  >
+                                    {category.name}
+                                  </Link>
+                                </li>
+                              );
+                            })}
                         </ul>
                       </div>
                     </div>
