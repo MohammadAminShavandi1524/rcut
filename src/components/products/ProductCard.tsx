@@ -64,14 +64,14 @@ const ProductCard = ({ product, showCategory = true }: Props) => {
 
           <h3
             className={cn(
-              "text-foreground text-sm font-bold sm:text-base",
+              "text-foreground line-clamp-2 text-sm font-bold sm:text-base",
               showCategory && "mt-2",
             )}
           >
             {product.name}
           </h3>
 
-          <p className="text-muted-foreground mt-2 pe-1 text-justify text-[13px] leading-6 sm:mt-3 sm:pe-2 sm:text-sm sm:leading-7">
+          <p className="text-muted-foreground mt-2 line-clamp-3 pe-1 text-justify text-[13px] leading-6 sm:mt-3 sm:pe-2 sm:text-sm sm:leading-7">
             {product.description}
           </p>
         </Link>

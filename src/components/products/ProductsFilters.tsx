@@ -4,9 +4,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import ProductsSort from "./ProductsSort";
 import ProductsCategoryFilter from "./ProductsCategoryFilter";
+import ProductsBrandFilter from "./ProductsBrandFilter";
 import ProductsTypeFilter from "./ProductsTypeFilter";
 
 import type { CategoryNode } from "./products.categories";
+import type { ApiBrand } from "./products.api";
 
 import {
   findLiveCategoryByKey,
@@ -16,9 +18,10 @@ import {
 
 type Props = {
   categories: CategoryNode[];
+  brands: ApiBrand[];
 };
 
-const ProductsFilters = ({ categories }: Props) => {
+const ProductsFilters = ({ categories, brands }: Props) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -61,6 +64,17 @@ const ProductsFilters = ({ categories }: Props) => {
   if (scopeCategoryId !== undefined && selectedCategories.length === 0) {
     selectedCategories.push(scopeCategoryId);
   }
+
+  const brandParam = searchParams.get("brand");
+  const parsedBrandId = brandParam === null ? null : Number(brandParam);
+
+  const selectedBrandId =
+    parsedBrandId !== null &&
+    Number.isSafeInteger(parsedBrandId) &&
+    parsedBrandId > 0 &&
+    brands.some((brand) => brand.id === parsedBrandId)
+      ? parsedBrandId
+      : null;
 
   const bestSellerOnly = searchParams.get("bestSeller") === "1";
 
@@ -116,6 +130,10 @@ const ProductsFilters = ({ categories }: Props) => {
     replaceParams(params);
   };
 
+  const handleBrandChange = (id: number | null) => {
+    updateUrl("brand", id === null ? undefined : String(id));
+  };
+
   const handleSortChange = (value: "newest" | "best-selling") => {
     updateUrl("sort", value === "newest" ? undefined : value);
   };
@@ -136,6 +154,12 @@ const ProductsFilters = ({ categories }: Props) => {
         selectedCategories={selectedCategories}
         onToggle={handleCategoryToggle}
         scopeCategoryId={scopeCategoryId}
+      />
+
+      <ProductsBrandFilter
+        brands={brands}
+        selectedBrandId={selectedBrandId}
+        onChange={handleBrandChange}
       />
 
       <ProductsTypeFilter

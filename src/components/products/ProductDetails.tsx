@@ -61,10 +61,37 @@ const ProductDetails = ({ product, products, categories }: Props) => {
   return (
     <main dir="rtl" className="bg-background">
       <section className="w90 3xl:px-10 3xl:pb-20 mx-auto py-6 sm:py-8 lg:px-6 lg:pb-14 xl:px-8">
-        {/* Breadcrumb */}
+        {/* Breadcrumb - Mobile / Tablet */}
         <nav
           aria-label="مسیر صفحه"
-          className="ms-1.5 flex flex-wrap items-center gap-x-2 gap-y-3 text-sm"
+          className="ms-1.5 flex min-w-0 items-center gap-2 text-sm lg:hidden"
+        >
+          <Link
+            href="/products"
+            className="text-muted-foreground hover:text-custom-primary shrink-0 transition-colors"
+          >
+            محصولات
+          </Link>
+
+          <ChevronLeft
+            size={15}
+            aria-hidden="true"
+            className="text-muted-foreground shrink-0"
+          />
+
+          <span
+            aria-current="page"
+            title={product.name}
+            className="text-foreground min-w-0 flex-1 truncate font-medium"
+          >
+            {product.name}
+          </span>
+        </nav>
+
+        {/* Breadcrumb - Desktop */}
+        <nav
+          aria-label="مسیر صفحه"
+          className="ms-1.5 hidden flex-wrap items-center gap-x-2 gap-y-3 text-sm lg:flex"
         >
           <Link
             href="/"
@@ -139,6 +166,7 @@ const ProductDetails = ({ product, products, categories }: Props) => {
                 {product.name}
               </h1>
 
+              {/* Category */}
               <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
                 <span className="text-muted-foreground">دسته‌بندی:</span>
 
@@ -150,16 +178,34 @@ const ProductDetails = ({ product, products, categories }: Props) => {
                 </Link>
               </div>
 
+              {/* Brand */}
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+                <span className="text-muted-foreground">برند:</span>
+
+                {product.brand ? (
+                  <Link
+                    href={`/products?brand=${product.brand.id}`}
+                    className="text-custom-primary hover:text-foreground font-medium transition-colors"
+                  >
+                    {product.brand.name}
+                  </Link>
+                ) : (
+                  <span className="text-foreground font-medium">ندارد</span>
+                )}
+              </div>
+
+              {/* Description */}
               <div className="mt-8">
                 <h2 className="text-foreground text-sm font-semibold">
                   توضیحات محصول
                 </h2>
 
-                <p className="text-muted-foreground mt-3 text-sm leading-8 whitespace-pre-line sm:text-base sm:leading-9">
+                <p className="text-muted-foreground mt-3 text-sm leading-8 whitespace-pre-line sm:text-base sm:leading-9 text-justify">
                   {product.description}
                 </p>
               </div>
 
+              {/* Price Inquiry */}
               <div className="border-border mt-10 border-t pt-6">
                 <Link
                   href="tel:09192081368"

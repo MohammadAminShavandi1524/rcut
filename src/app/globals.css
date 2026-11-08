@@ -281,9 +281,8 @@
       padding-inline: 28px;
     }
   }
-
   .headerPadding {
-    padding-top: 141px;
+    padding-top: 0;
   }
 
   @media (min-width: 64rem) {

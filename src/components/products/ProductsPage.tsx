@@ -14,8 +14,10 @@ import { ProductsListSkeleton } from "./ProductsSkeleton";
 import {
   getProducts,
   getCategories,
+  getBrands,
   type ApiProduct,
   type ApiCategory,
+  type ApiBrand,
 } from "./products.api";
 
 import {
@@ -27,8 +29,6 @@ import {
   matchesLiveCategoryFilter,
 } from "./products-category-tree";
 
-import type { CategoryNode } from "./products.categories";
-
 type Props = {
   categorySlug?: string;
 };
@@ -38,6 +38,7 @@ const ProductsPage = ({ categorySlug }: Props) => {
 
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [categories, setCategories] = useState<ApiCategory[]>([]);
+  const [brands, setBrands] = useState<ApiBrand[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
 
@@ -48,24 +49,31 @@ const ProductsPage = ({ categorySlug }: Props) => {
 
     const loadProducts = async () => {
       try {
-        const [productsData, categoriesData] = await Promise.all([
+        const [productsData, categoriesData, brandsData] = await Promise.all([
           getProducts(controller.signal),
           getCategories(controller.signal),
+          getBrands(controller.signal),
         ]);
 
         if (controller.signal.aborted) return;
 
-        if (!Array.isArray(productsData) || !Array.isArray(categoriesData)) {
+        if (
+          !Array.isArray(productsData) ||
+          !Array.isArray(categoriesData) ||
+          !Array.isArray(brandsData)
+        ) {
           throw new Error("ساختار اطلاعات محصولات نامعتبر است.");
         }
 
         setProducts(productsData);
         setCategories(categoriesData);
+        setBrands(brandsData);
         setLoadError(false);
       } catch (error) {
         if (controller.signal.aborted) return;
 
         console.error("GET PRODUCTS PAGE ERROR:", error);
+
         setLoadError(true);
       } finally {
         if (!controller.signal.aborted) {
@@ -87,8 +95,19 @@ const ProductsPage = ({ categorySlug }: Props) => {
   const sort = searchParams.get("sort") || "newest";
   const categoriesParam = searchParams.get("categories") ?? "";
   const scopeParam = searchParams.get("scope");
+  const brandParam = searchParams.get("brand");
   const bestSellerOnly = searchParams.get("bestSeller") === "1";
   const selectedProduct = searchParams.get("product");
+
+  const parsedBrandId = brandParam === null ? null : Number(brandParam);
+
+  const selectedBrandId =
+    parsedBrandId !== null &&
+    Number.isSafeInteger(parsedBrandId) &&
+    parsedBrandId > 0 &&
+    brands.some((brand) => brand.id === parsedBrandId)
+      ? parsedBrandId
+      : null;
 
   const scopeCategory = scopeParam
     ? findLiveCategoryByKey(scopeParam, categoryTree)
@@ -158,6 +177,12 @@ const ProductsPage = ({ categorySlug }: Props) => {
       );
     }
 
+    if (selectedBrandId !== null) {
+      result = result.filter(
+        (product) => product.brand?.id === selectedBrandId,
+      );
+    }
+
     if (bestSellerOnly) {
       result = result.filter((product) => product.top_seller === true);
     }
@@ -177,6 +202,7 @@ const ProductsPage = ({ categorySlug }: Props) => {
     scopeCategory,
     scopeLeafIds,
     selectedCategoryIds,
+    selectedBrandId,
     bestSellerOnly,
     sort,
     categoryTree,
@@ -307,7 +333,7 @@ const ProductsPage = ({ categorySlug }: Props) => {
               filtersOpen ? "block" : "hidden",
             )}
           >
-            <ProductsFilters categories={categoryTree} />
+            <ProductsFilters categories={categoryTree} brands={brands} />
           </div>
 
           {/* Products */}

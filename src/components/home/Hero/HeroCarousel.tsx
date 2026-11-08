@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import useEmblaCarousel from "embla-carousel-react";
 
@@ -11,24 +11,14 @@ import { heroSlides } from "./hero.data";
 const AUTOPLAY_DURATION = 3000;
 
 const HeroCarousel = () => {
+  const [introFinished, setIntroFinished] = useState(false);
+
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     direction: "rtl",
   });
 
   const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const startAutoplay = useCallback(() => {
-    if (!emblaApi) return;
-
-    if (autoplayRef.current) {
-      clearInterval(autoplayRef.current);
-    }
-
-    autoplayRef.current = setInterval(() => {
-      emblaApi.scrollNext();
-    }, AUTOPLAY_DURATION);
-  }, [emblaApi]);
 
   const stopAutoplay = useCallback(() => {
     if (!autoplayRef.current) return;
@@ -37,29 +27,48 @@ const HeroCarousel = () => {
     autoplayRef.current = null;
   }, []);
 
+  const startAutoplay = useCallback(() => {
+    if (!emblaApi || !introFinished) return;
+
+    if (autoplayRef.current) {
+      clearInterval(autoplayRef.current);
+    }
+
+    autoplayRef.current = setInterval(() => {
+      emblaApi.scrollNext();
+    }, AUTOPLAY_DURATION);
+  }, [emblaApi, introFinished]);
+
+  const finishIntro = useCallback(() => {
+    setIntroFinished(true);
+  }, []);
+
   const prev = useCallback(() => {
-    if (!emblaApi) return;
+    if (!emblaApi || !introFinished) return;
 
     emblaApi.scrollNext();
     startAutoplay();
-  }, [emblaApi, startAutoplay]);
+  }, [emblaApi, introFinished, startAutoplay]);
 
   const next = useCallback(() => {
-    if (!emblaApi) return;
+    if (!emblaApi || !introFinished) return;
 
     emblaApi.scrollPrev();
     startAutoplay();
-  }, [emblaApi, startAutoplay]);
+  }, [emblaApi, introFinished, startAutoplay]);
 
   useEffect(() => {
-    if (!emblaApi) return;
+    if (!emblaApi || !introFinished) {
+      stopAutoplay();
+      return;
+    }
 
     startAutoplay();
 
     return () => {
       stopAutoplay();
     };
-  }, [emblaApi, startAutoplay, stopAutoplay]);
+  }, [emblaApi, introFinished, startAutoplay, stopAutoplay]);
 
   return (
     <section
@@ -87,9 +96,43 @@ const HeroCarousel = () => {
       </div>
 
       {/* Navigation Controls */}
-      <div className="absolute right-7 bottom-5 z-20 sm:right-[5%] sm:bottom-6 lg:right-8 lg:bottom-8">
-        <HeroControls onPrev={prev} onNext={next} />
-      </div>
+      {introFinished && (
+        <div className="absolute right-7 bottom-5 z-20 sm:right-[5%] sm:bottom-6 lg:right-8 lg:bottom-8">
+          <HeroControls onPrev={prev} onNext={next} />
+        </div>
+      )}
+
+      {/* Intro Logo Motion */}
+      {!introFinished && (
+        <div
+          className="absolute inset-0 z-30 overflow-hidden bg-black"
+          aria-label="لوگوموشن RCUT"
+        >
+          <video
+            autoPlay
+            muted
+            playsInline
+            preload="auto"
+            loop={false}
+            controls={false}
+            onEnded={finishIntro}
+            onError={finishIntro}
+            className="absolute inset-0 h-full w-full object-contain"
+          >
+            <source
+              src="/mobile.webm"
+              type="video/webm"
+              media="(max-width: 639px)"
+            />
+
+            <source
+              src="/desktop.webm"
+              type="video/webm"
+              media="(min-width: 640px)"
+            />
+          </video>
+        </div>
+      )}
     </section>
   );
 };
