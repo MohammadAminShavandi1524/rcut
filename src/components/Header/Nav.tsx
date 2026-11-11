@@ -11,6 +11,8 @@ const Nav = () => {
 
         <ProductsDropdown />
 
+        <NavItem label="کاتالوگ محصولات و برندها" href="/catalogs" />
+
         <NavItem label="نمایندگی یاماسا" href="/yamasa" />
 
         <NavItem label="درباره ما" href="/about-us" />

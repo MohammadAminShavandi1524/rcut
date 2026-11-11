@@ -1,29 +1,29 @@
 export const heroSlides = [
   {
     id: 1,
-    image: "/hero/1.webp",
-    mobileImage: "/hero/mobile/1.webp",
+    image: "/hero/11.webp",
+    mobileImage: "/hero/mobile/11.webp",
     title: "تامین ابزارهای تخصصی ماشین‌کاری",
     description:
       "ارائه ابزارهای تراشکاری، فرزکاری و CNC با کیفیت بالا برای صنایع مختلف",
   },
   {
     id: 2,
-    image: "/hero/2.webp",
-    mobileImage: "/hero/mobile/2.webp",
+    image: "/hero/22.webp",
+    mobileImage: "/hero/mobile/22.webp",
     title: "ابزارهای تراشکاری صنعتی",
     description: "راهکارهای دقیق برای تولید قطعات با کیفیت و دقت بالا",
   },
   {
     id: 3,
-    image: "/hero/3.webp",
-    mobileImage: "/hero/mobile/3.webp",
+    image: "/hero/33.webp",
+    mobileImage: "/hero/mobile/33.webp",
     title: "ابزارهای فرزکاری",
     description: "مجموعه‌ای از ابزارهای حرفه‌ای برای عملیات ماشین‌کاری",
   },
   {
     id: 4,
-    image: "/hero/4.webp",
+    image: "/hero/44.webp",
     mobileImage: "/hero/mobile/4.webp",
     title: "فرز انگشتی و ابزارهای برشی",
     description: "انتخاب مناسب ابزار برای افزایش بهره‌وری تولید",
