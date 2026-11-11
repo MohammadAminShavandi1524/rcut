@@ -47,6 +47,9 @@ async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
 export const getProducts = (signal?: AbortSignal) =>
   getJson<ApiProduct[]>("/api/products", signal);
 
+export const getProductsByBrand = (brandId: number, signal?: AbortSignal) =>
+  getJson<ApiProduct[]>(`/api/products/by-brand/${brandId}`, signal);
+
 export const getCategories = (signal?: AbortSignal) =>
   getJson<ApiCategory[]>("/api/categories", signal);
 

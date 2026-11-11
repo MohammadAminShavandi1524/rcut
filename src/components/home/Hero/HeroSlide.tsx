@@ -42,7 +42,7 @@ const HeroSlide = ({ slide, priority = false }: Props) => {
       {/* Text Content */}
       <div className="relative z-10 flex h-full items-center">
         <div className="w90">
-          <div className="max-w-xl pb-12 text-right text-white min-[480px]:pb-0">
+          <div className="max-w-xl pb-12 text-right text-white min-[480px]:pb-0 max-s:hidden">
             <h1 className="xss:text-[30px] text-[28px] leading-[1.6] font-bold min-[480px]:text-[34px] sm:text-[40px] lg:text-[44px] xl:text-5xl xl:leading-[1.4]">
               {slide.title}
             </h1>

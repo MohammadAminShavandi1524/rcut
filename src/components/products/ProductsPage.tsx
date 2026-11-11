@@ -13,6 +13,7 @@ import { ProductsListSkeleton } from "./ProductsSkeleton";
 
 import {
   getProducts,
+  getProductsByBrand,
   getCategories,
   getBrands,
   type ApiProduct,
@@ -33,56 +34,66 @@ type Props = {
   categorySlug?: string;
 };
 
+type ProductsResult = {
+  brandId: number | null;
+  items: ApiProduct[];
+};
+
 const ProductsPage = ({ categorySlug }: Props) => {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const [products, setProducts] = useState<ApiProduct[]>([]);
+  const [productsResult, setProductsResult] = useState<ProductsResult | null>(
+    null,
+  );
+
   const [categories, setCategories] = useState<ApiCategory[]>([]);
   const [brands, setBrands] = useState<ApiBrand[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
+
+  const [metadataReady, setMetadataReady] = useState(false);
+  const [metadataError, setMetadataError] = useState(false);
+
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [productsError, setProductsError] = useState(false);
 
   const searchParams = useSearchParams();
 
+  const sort = searchParams.get("sort") || "newest";
+  const categoriesParam = searchParams.get("categories") ?? "";
+  const scopeParam = searchParams.get("scope");
+  const brandParam = searchParams.get("brand");
+  const bestSellerOnly = searchParams.get("bestSeller") === "1";
+  const selectedProduct = searchParams.get("product");
+
+  // Load categories and brands once
   useEffect(() => {
     const controller = new AbortController();
 
-    const loadProducts = async () => {
+    const loadMetadata = async () => {
       try {
-        const [productsData, categoriesData, brandsData] = await Promise.all([
-          getProducts(controller.signal),
+        const [categoriesData, brandsData] = await Promise.all([
           getCategories(controller.signal),
           getBrands(controller.signal),
         ]);
 
         if (controller.signal.aborted) return;
 
-        if (
-          !Array.isArray(productsData) ||
-          !Array.isArray(categoriesData) ||
-          !Array.isArray(brandsData)
-        ) {
-          throw new Error("ساختار اطلاعات محصولات نامعتبر است.");
+        if (!Array.isArray(categoriesData) || !Array.isArray(brandsData)) {
+          throw new Error("ساختار دسته‌بندی‌ها یا برندها نامعتبر است.");
         }
 
-        setProducts(productsData);
         setCategories(categoriesData);
         setBrands(brandsData);
-        setLoadError(false);
+        setMetadataError(false);
+        setMetadataReady(true);
       } catch (error) {
         if (controller.signal.aborted) return;
 
-        console.error("GET PRODUCTS PAGE ERROR:", error);
-
-        setLoadError(true);
-      } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-        }
+        console.error("GET PRODUCTS METADATA ERROR:", error);
+        setMetadataError(true);
       }
     };
 
-    void loadProducts();
+    void loadMetadata();
 
     return () => controller.abort();
   }, []);
@@ -91,13 +102,6 @@ const ProductsPage = ({ categorySlug }: Props) => {
     () => buildCategoryTree(categories),
     [categories],
   );
-
-  const sort = searchParams.get("sort") || "newest";
-  const categoriesParam = searchParams.get("categories") ?? "";
-  const scopeParam = searchParams.get("scope");
-  const brandParam = searchParams.get("brand");
-  const bestSellerOnly = searchParams.get("bestSeller") === "1";
-  const selectedProduct = searchParams.get("product");
 
   const parsedBrandId = brandParam === null ? null : Number(brandParam);
 
@@ -108,6 +112,53 @@ const ProductsPage = ({ categorySlug }: Props) => {
     brands.some((brand) => brand.id === parsedBrandId)
       ? parsedBrandId
       : null;
+
+  // Fetch products from backend whenever selected brand changes
+  useEffect(() => {
+    if (!metadataReady) return;
+
+    const controller = new AbortController();
+
+    const loadProducts = async () => {
+      setProductsLoading(true);
+      setProductsError(false);
+
+      try {
+        const productsData =
+          selectedBrandId === null
+            ? await getProducts(controller.signal)
+            : await getProductsByBrand(selectedBrandId, controller.signal);
+
+        if (controller.signal.aborted) return;
+
+        if (!Array.isArray(productsData)) {
+          throw new Error("ساختار اطلاعات محصولات نامعتبر است.");
+        }
+
+        setProductsResult({
+          brandId: selectedBrandId,
+          items: productsData,
+        });
+
+        setProductsError(false);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+
+        console.error("GET PRODUCTS PAGE ERROR:", error);
+
+        setProductsResult(null);
+        setProductsError(true);
+      } finally {
+        if (!controller.signal.aborted) {
+          setProductsLoading(false);
+        }
+      }
+    };
+
+    void loadProducts();
+
+    return () => controller.abort();
+  }, [metadataReady, selectedBrandId]);
 
   const scopeCategory = scopeParam
     ? findLiveCategoryByKey(scopeParam, categoryTree)
@@ -152,6 +203,9 @@ const ProductsPage = ({ categorySlug }: Props) => {
     return filteredIds.length > 0 ? filteredIds : [scopeCategory.id];
   }, [categoriesParam, categoryTree, scopeCategory, scopeLeafIds]);
 
+  const products =
+    productsResult?.brandId === selectedBrandId ? productsResult.items : [];
+
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
@@ -177,12 +231,6 @@ const ProductsPage = ({ categorySlug }: Props) => {
       );
     }
 
-    if (selectedBrandId !== null) {
-      result = result.filter(
-        (product) => product.brand?.id === selectedBrandId,
-      );
-    }
-
     if (bestSellerOnly) {
       result = result.filter((product) => product.top_seller === true);
     }
@@ -202,7 +250,6 @@ const ProductsPage = ({ categorySlug }: Props) => {
     scopeCategory,
     scopeLeafIds,
     selectedCategoryIds,
-    selectedBrandId,
     bestSellerOnly,
     sort,
     categoryTree,
@@ -210,11 +257,7 @@ const ProductsPage = ({ categorySlug }: Props) => {
 
   const showProductCategory = selectedCategoryIds.length !== 1;
 
-  if (loading) {
-    return <ProductsListSkeleton />;
-  }
-
-  if (loadError) {
+  if (metadataError || productsError) {
     return (
       <main
         dir="rtl"
@@ -225,6 +268,15 @@ const ProductsPage = ({ categorySlug }: Props) => {
         </p>
       </main>
     );
+  }
+
+  if (
+    !metadataReady ||
+    productsLoading ||
+    productsResult === null ||
+    productsResult.brandId !== selectedBrandId
+  ) {
+    return <ProductsListSkeleton />;
   }
 
   return (

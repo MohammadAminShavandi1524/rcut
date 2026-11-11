@@ -117,7 +117,7 @@ const HeroCarousel = () => {
             controls={false}
             onEnded={finishIntro}
             onError={finishIntro}
-            className="absolute inset-0 h-full w-full object-contain"
+            className="absolute inset-0 h-full w-full object-cover"
           >
             <source
               src="/mobile.webm"
@@ -126,7 +126,7 @@ const HeroCarousel = () => {
             />
 
             <source
-              src="/desktop.webm"
+              src="/22.webm"
               type="video/webm"
               media="(min-width: 640px)"
             />
