@@ -38,6 +38,28 @@ export const getCatalogs = async (
   return data as ApiCatalog[];
 };
 
+export const getCatalogsByBrand = async (
+  brandId: number,
+  signal?: AbortSignal,
+): Promise<ApiCatalog[]> => {
+  const response = await fetch(`/api/catalogs/by-brand/${brandId}`, {
+    cache: "no-store",
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new Error(`GET CATALOGS BY BRAND FAILED: ${response.status}`);
+  }
+
+  const data: unknown = await response.json();
+
+  if (!Array.isArray(data)) {
+    throw new Error("Invalid brand catalogs response");
+  }
+
+  return data as ApiCatalog[];
+};
+
 export const getCatalogBrands = (catalogs: ApiCatalog[]): CatalogBrand[] => {
   const brandMap = new Map<number, CatalogBrand>();
 
