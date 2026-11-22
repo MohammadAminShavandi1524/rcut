@@ -90,11 +90,7 @@ const CatalogsPage = () => {
   }, [loading, error, items.length]);
 
   return (
-    <main
-      ref={sectionRef}
-      dir="rtl"
-      className="bg-background min-h-screen"
-    >
+    <main ref={sectionRef} dir="rtl" className="bg-background min-h-screen">
       <section className="w90 3xl:px-10 mx-auto py-6 sm:py-8 lg:px-6 xl:px-8">
         {/* Breadcrumb */}
         <nav
@@ -114,10 +110,7 @@ const CatalogsPage = () => {
             className="text-muted-foreground shrink-0"
           />
 
-          <span
-            aria-current="page"
-            className="text-foreground font-medium"
-          >
+          <span aria-current="page" className="text-foreground font-medium">
             کاتالوگ محصولات و برندها
           </span>
         </nav>
@@ -139,16 +132,16 @@ const CatalogsPage = () => {
         <div className="mt-7 sm:mt-9 lg:mt-11">
           {loading ? (
             <div
-              className="grid min-w-0 grid-cols-1 gap-4 s:grid-cols-[repeat(2,minmax(0,330px))] lg:grid-cols-[repeat(3,minmax(0,330px))] 2xl:grid-cols-[repeat(4,minmax(0,330px))]"
+              className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
               role="status"
               aria-label="در حال بارگذاری برندها"
             >
               {Array.from({ length: 4 }).map((_, index) => (
                 <div
                   key={index}
-                  className="border-border w-full animate-pulse overflow-hidden rounded-2xl border s:max-w-[330px]"
+                  className="border-border w-full min-w-0 animate-pulse overflow-hidden rounded-2xl border"
                 >
-                  <div className="bg-secondary-bg flex aspect-square items-center justify-center">
+                  <div className="bg-secondary-bg flex aspect-[2/1] items-center justify-center">
                     <div className="bg-border/50 size-24 rounded-xl" />
                   </div>
 
@@ -179,24 +172,24 @@ const CatalogsPage = () => {
               </p>
             </div>
           ) : (
-            <div className="catalogs-grid grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-[repeat(2,minmax(0,330px))] lg:grid-cols-[repeat(3,minmax(0,330px))] 2xl:grid-cols-[repeat(4,minmax(0,330px))]">
+            <div className="catalogs-grid grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {items.map(({ brand }) => (
                 <article
                   key={brand.id}
-                  className="catalog-brand-card group border-border bg-background hover:border-custom-primary flex h-full w-full min-w-0 flex-col overflow-hidden rounded-2xl border transition-[border-color,box-shadow] duration-300 hover:shadow-[0_12px_35px_rgba(0,0,0,0.05)] sm:max-w-[330px]"
+                  className="catalog-brand-card group border-border bg-background hover:border-custom-primary flex h-full w-full min-w-0 flex-col overflow-hidden rounded-2xl border transition-[border-color,box-shadow] duration-300 hover:shadow-[0_12px_35px_rgba(0,0,0,0.05)]"
                 >
-                  {/* Square Brand Image */}
+                  {/* Brand Image - 2:1 */}
                   <Link
                     href={`/catalogs/${brand.id}`}
                     aria-label={`مشاهده محصولات و کاتالوگ‌های ${brand.name}`}
-                    className="bg-secondary-bg/50 border-border relative flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden border-b"
+                    className="bg-secondary-bg/50 border-border relative flex aspect-[2/1] w-full shrink-0 items-center justify-center overflow-hidden border-b"
                   >
                     {brand.image ? (
                       <Image
                         src={brand.image}
                         alt={`لوگوی ${brand.name}`}
                         fill
-                        sizes="(max-width: 479px) 100vw, (max-width: 1023px) 45vw, 330px"
+                        sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, (max-width: 1535px) 33vw, 25vw"
                         className="object-contain p-5 transition-transform duration-500 group-hover:scale-105 sm:p-6"
                       />
                     ) : (
@@ -223,7 +216,6 @@ const CatalogsPage = () => {
                       className="border-custom-primary text-custom-primary hover:bg-custom-primary mt-auto flex min-h-10 items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-[12px] font-semibold transition-colors duration-300 hover:text-white sm:mt-5 sm:text-[13px]"
                     >
                       مشاهده محصولات و کاتالوگ‌ها
-
                       <ArrowLeft
                         size={16}
                         strokeWidth={1.8}

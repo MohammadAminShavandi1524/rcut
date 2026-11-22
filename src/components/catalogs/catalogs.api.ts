@@ -6,7 +6,6 @@ export interface ApiCatalog {
   description: string;
   image: string | null;
   brand: ApiBrand | null;
-  cover: string | null;
   file: string | null;
   index: number;
   created: string;
@@ -64,7 +63,7 @@ export const getCatalogBrands = (catalogs: ApiCatalog[]): CatalogBrand[] => {
   const brandMap = new Map<number, CatalogBrand>();
 
   for (const catalog of catalogs) {
-    if (!catalog.brand || !catalog.image?.trim() || !catalog.file?.trim()) {
+    if (!catalog.brand || !catalog.file?.trim()) {
       continue;
     }
 
