@@ -13,7 +13,7 @@ const CatalogBrandIntro = ({ catalogBrand }: Props) => {
 
   return (
     <section className="catalog-brand-heading border-border mt-6 overflow-hidden rounded-2xl border sm:mt-8">
-      <div className="grid min-w-0 gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-center lg:gap-10 lg:p-8 xl:grid-cols-[minmax(0,1fr)_260px] xl:p-10">
+      <div className="grid min-w-0 gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-center lg:gap-10 lg:p-8 xl:grid-cols-[minmax(0,1fr)_480px] xl:p-10 2xl:grid-cols-[minmax(0,1fr)_540px]">
         {/* Brand Information */}
         <div className="min-w-0 text-right">
           <h1
@@ -50,21 +50,21 @@ const CatalogBrandIntro = ({ catalogBrand }: Props) => {
           </div>
         </div>
 
-        {/* Brand Logo */}
-        <div className="border-border bg-secondary-bg/40 relative order-first mx-auto aspect-square w-full max-w-[190px] overflow-hidden rounded-xl border sm:max-w-[220px] lg:order-last lg:max-w-none">
+        {/* Brand Logo - Large 2:1 */}
+        <div className="border-border bg-secondary-bg/40 relative order-first mx-auto aspect-[2/1] w-full max-w-[420px] overflow-hidden rounded-xl border sm:max-w-[480px] lg:order-last lg:max-w-none">
           {brand.image ? (
             <Image
               src={brand.image}
               alt={`لوگوی ${brand.name}`}
               fill
               priority
-              sizes="(max-width: 1023px) 220px, 260px"
-              className="object-contain p-4 sm:p-5"
+              sizes="(max-width: 639px) 100vw, (max-width: 1023px) 480px, (max-width: 1279px) 400px, (max-width: 1535px) 480px, 540px"
+              className="object-contain p-3 transition-transform duration-500 sm:p-4 lg:p-5"
             />
           ) : (
             <div className="flex h-full items-center justify-center">
               <FileText
-                size={45}
+                size={55}
                 className="text-muted-foreground"
                 strokeWidth={1.2}
               />
