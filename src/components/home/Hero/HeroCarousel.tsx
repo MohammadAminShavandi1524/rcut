@@ -120,7 +120,7 @@ const HeroCarousel = () => {
             className="absolute inset-0 h-full w-full object-cover"
           >
             <source
-              src="/mobile.webm"
+              src="/mobile2.webm"
               type="video/webm"
               media="(max-width: 639px)"
             />
