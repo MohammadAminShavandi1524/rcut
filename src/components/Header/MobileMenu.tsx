@@ -32,6 +32,7 @@ interface ApiCategory {
 const navigationItems = [
   { label: "خانه", href: "/" },
   { label: "محصولات", href: "/products" },
+  { label: "کاتالوگ محصولات و برندها", href: "/catalogs" },
   { label: "نمایندگی یاماسا", href: "/yamasa" },
   { label: "درباره ما", href: "/about-us" },
   { label: "تماس با ما", href: "/contact-us" },

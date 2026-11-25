@@ -26,7 +26,7 @@ interface FooterItem {
   href: string;
 }
 
-const MAX_ITEMS = 6;
+const MAX_ITEMS = 7;
 
 const Footer = () => {
   const [categories, setCategories] = useState<FooterItem[]>([]);
@@ -131,6 +131,10 @@ const Footer = () => {
               {
                 title: "محصولات",
                 href: "/products",
+              },
+              {
+                title: "کاتالوگ محصولات و برندها",
+                href: "/catalogs",
               },
               {
                 title: "نمایندگی یاماسا",
