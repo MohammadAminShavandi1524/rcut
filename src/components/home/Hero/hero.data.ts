@@ -56,11 +56,11 @@ export const heroSlides = [
     title: "هولدر و سیستم‌های گیرشی",
     description: "تجهیزات نگهدارنده ابزار برای ماشین‌کاری حرفه‌ای",
   },
-  {
-    id: 9,
-    image: "/hero/9.webp",
-    mobileImage: "/hero/mobile/9.webp",
-    title: "برندهای معتبر صنعتی",
-    description: "همکاری با تولیدکنندگان مطرح ابزارهای ماشین‌کاری",
-  },
+  // {
+  //   id: 9,
+  //   image: "/hero/9.webp",
+  //   mobileImage: "/hero/mobile/9.webp",
+  //   title: "برندهای معتبر صنعتی",
+  //   description: "همکاری با تولیدکنندگان مطرح ابزارهای ماشین‌کاری",
+  // },
 ];
